@@ -17,7 +17,7 @@ data class RoleEntity(
     val type: Type,
 
     @ManyToMany(mappedBy = "roles", fetch = FetchType.LAZY)
-    val users: List<UserEntity> = mutableListOf()
+    val users: List<UserEntity> = listOf()
 ) {
 
     enum class Type {
@@ -27,5 +27,5 @@ data class RoleEntity(
 
 fun RoleEntity.toDTO() = RoleDTO(
     id = id ?: 0,
-    type = type,
+    type = type
 )
