@@ -3,6 +3,7 @@ package rhino10001.todolist.dto.user
 import rhino10001.todolist.dto.role.RoleDTO
 import rhino10001.todolist.dto.role.toEntity
 import rhino10001.todolist.model.UserEntity
+import rhino10001.todolist.security.JwtUserDetailsImpl
 
 data class UserDTO(
     val id: Long = 0,
@@ -20,4 +21,11 @@ fun UserDTO.toEntity() = UserEntity(
 fun UserDTO.toResponseRegistration() = UserRequestRegistration(
     username = username,
     password = password
+)
+
+fun UserDTO.toJwtUserDetailsImpl() = JwtUserDetailsImpl(
+    id = id,
+    username = username,
+    password = password,
+    roles = roles
 )

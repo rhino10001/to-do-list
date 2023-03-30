@@ -20,11 +20,10 @@ class UserServiceImpl @Autowired constructor(
 
     override fun register(user: UserDTO): UserDTO {
         val roleUser = roleRepository.findByType(RoleEntity.Type.USER).toDTO()
-        val us = user.copy(
-            password = BCryptPasswordEncoder(13).encode(user.password),
+        val copy = user.copy(
             roles = listOf(roleUser)
         )
-        return userRepository.save(us.toEntity()).toDTO()
+        return userRepository.save(copy.toEntity()).toDTO()
     }
 
     override fun findByUsername(username: String): UserDTO {
