@@ -1,7 +1,6 @@
 package rhino10001.todolist.service.impl
 
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import rhino10001.todolist.dto.user.UserDTO
 import rhino10001.todolist.dto.user.toEntity
