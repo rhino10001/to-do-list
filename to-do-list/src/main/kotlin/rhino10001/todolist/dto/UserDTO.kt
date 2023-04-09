@@ -1,7 +1,6 @@
-package rhino10001.todolist.dto.user
+package rhino10001.todolist.dto
 
-import rhino10001.todolist.dto.role.RoleDTO
-import rhino10001.todolist.dto.role.toEntity
+import rhino10001.todolist.dto.response.RegistrationResponse
 import rhino10001.todolist.model.UserEntity
 import rhino10001.todolist.security.JwtUserDetailsImpl
 
@@ -18,9 +17,9 @@ fun UserDTO.toEntity() = UserEntity(
     roles = roles.map { it.toEntity() }
 )
 
-fun UserDTO.toResponseRegistration() = UserRequestRegistration(
-    username = username,
-    password = password
+fun UserDTO.toRegistrationResponse() = RegistrationResponse(
+    id = id,
+    username = username
 )
 
 fun UserDTO.toJwtUserDetailsImpl() = JwtUserDetailsImpl(

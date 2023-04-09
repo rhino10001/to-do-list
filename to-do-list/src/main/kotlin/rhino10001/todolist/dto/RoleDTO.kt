@@ -1,4 +1,4 @@
-package rhino10001.todolist.dto.role
+package rhino10001.todolist.dto
 
 import rhino10001.todolist.model.RoleEntity
 import rhino10001.todolist.model.UserEntity

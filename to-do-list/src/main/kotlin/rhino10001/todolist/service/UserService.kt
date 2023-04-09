@@ -1,6 +1,6 @@
 package rhino10001.todolist.service
 
-import rhino10001.todolist.dto.user.UserDTO
+import rhino10001.todolist.dto.UserDTO
 
 interface UserService {
 

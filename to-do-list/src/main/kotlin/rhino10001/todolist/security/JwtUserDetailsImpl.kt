@@ -2,7 +2,7 @@ package rhino10001.todolist.security
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
-import rhino10001.todolist.dto.role.RoleDTO
+import rhino10001.todolist.dto.RoleDTO
 
 class JwtUserDetailsImpl(
     val id: Long = 0,

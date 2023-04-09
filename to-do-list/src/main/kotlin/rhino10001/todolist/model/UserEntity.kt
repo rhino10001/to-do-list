@@ -1,7 +1,7 @@
 package rhino10001.todolist.model
 
 import jakarta.persistence.*
-import rhino10001.todolist.dto.user.UserDTO
+import rhino10001.todolist.dto.UserDTO
 
 @Entity
 @Table(name = "users")

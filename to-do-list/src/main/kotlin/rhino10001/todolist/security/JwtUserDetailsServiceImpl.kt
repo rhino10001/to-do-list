@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.stereotype.Service
-import rhino10001.todolist.dto.user.toJwtUserDetailsImpl
+import rhino10001.todolist.dto.toJwtUserDetailsImpl
 import rhino10001.todolist.service.UserService
 
 @Service

@@ -1,11 +1,18 @@
 package rhino10001.todolist.controller
 
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.web.bind.annotation.*
-import rhino10001.todolist.dto.user.*
+import rhino10001.todolist.dto.request.LoginRequest
+import rhino10001.todolist.dto.request.RefreshRequest
+import rhino10001.todolist.dto.request.RegistrationRequest
+import rhino10001.todolist.dto.request.toUserDTO
+import rhino10001.todolist.dto.response.LoginResponse
+import rhino10001.todolist.dto.response.RefreshResponse
+import rhino10001.todolist.dto.response.RegistrationResponse
+import rhino10001.todolist.dto.toRegistrationResponse
+import rhino10001.todolist.security.JwtAuthenticationException
 import rhino10001.todolist.security.JwtUtils
 import rhino10001.todolist.service.UserService
 
@@ -16,44 +23,33 @@ class AuthenticationController @Autowired constructor(
     val authenticationManager: AuthenticationManager,
     val jwtUtils: JwtUtils
 ) {
-    @GetMapping("/hello")
-    fun hello() = "Hello world!"
-
-    @GetMapping("/registration")
-    fun register() = "RegistrationPage!!"
 
     @PostMapping("/registration")
-    fun register(@RequestBody newUser: UserRequestRegistration): UserRequestRegistration {
-        return userService.register(newUser.toDTO()).toResponseRegistration()
+    fun register(@RequestBody registrationRequest: RegistrationRequest): RegistrationResponse {
+        return userService.register(registrationRequest.toUserDTO()).toRegistrationResponse()
     }
 
     @PostMapping("/login")
-    fun login(@RequestBody loginRequest: UserRequestAuthentication): ResponseEntity<Any> {
+    fun login(@RequestBody loginRequest: LoginRequest): LoginResponse {
         authenticationManager.authenticate(UsernamePasswordAuthenticationToken(loginRequest.username, loginRequest.password))
         val userDTO = userService.findByUsername(loginRequest.username)
-        val accessToken = jwtUtils.generateAccessToken(userDTO.username, userDTO.roles)
-        val refreshToken = jwtUtils.generateRefreshToken(userDTO.username)
-        val response = mapOf(
-            "username" to userDTO.username,
-            "accessToken" to accessToken,
-            "refreshToken" to refreshToken
+        return LoginResponse(
+            username = userDTO.username,
+            accessToken = jwtUtils.generateAccessToken(userDTO.username, userDTO.roles),
+            refreshToken = jwtUtils.generateRefreshToken(userDTO.username)
         )
-        return ResponseEntity.ok(response)
     }
 
-    @PostMapping("/refreshToken")
-    fun refreshToken(@RequestBody refreshRequest: RefreshRequest): ResponseEntity<Any> {
+    @PostMapping("/refresh")
+    fun refreshToken(@RequestBody refreshRequest: RefreshRequest): RefreshResponse {
         val token = refreshRequest.refreshToken
-        if (jwtUtils.validateRefreshToken(token)) {
-            val userDTO = userService.findByUsername(jwtUtils.getUsernameFromRefreshToken(token))
-            val accessToken = jwtUtils.generateAccessToken(userDTO.username, userDTO.roles)
-            val refreshToken = jwtUtils.generateRefreshToken(userDTO.username)
-            val response = mapOf(
-                "accessToken" to accessToken,
-                "refreshToken" to refreshToken
-            )
-            return ResponseEntity.ok(response)
+        if (!jwtUtils.validateRefreshToken(token)) {
+            throw JwtAuthenticationException("Invalid Token")
         }
-        return ResponseEntity.status(403).body("Невалидный токен")
+        val userDTO = userService.findByUsername(jwtUtils.getUsernameFromRefreshToken(token))
+        return RefreshResponse(
+            accessToken = jwtUtils.generateAccessToken(userDTO.username, userDTO.roles),
+            refreshToken = jwtUtils.generateRefreshToken(userDTO.username)
+        )
     }
 }

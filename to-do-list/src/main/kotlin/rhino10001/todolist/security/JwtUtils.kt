@@ -5,24 +5,25 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.stereotype.Component
-import rhino10001.todolist.dto.role.RoleDTO
+import rhino10001.todolist.dto.RoleDTO
 import java.util.*
 
 @Component
-class JwtUtils @Autowired constructor(
-//    @Value("\${jwt.authenticationToken.secret}")
-    val accessSecret: String = "1111111111111111111111111111111111111111111111111111111111111111111111111111111111",
-//    @Value("\${jwt.authenticationToken.expiration}")
-    val accessExpirationTime: Long = 30000,
-//    @Value("\${jwt.authenticationToken.secret}")
-    val refreshSecret: String = "" +
-            "",
-//    @Value("\${jwt.authenticationToken.expiration}")
-    val refreshExpirationTime: Long = 120000,
+data class JwtUtils @Autowired constructor(
+
+    @Value("\${jwt.authenticationToken.secret}")
+    val accessSecret: String,
+    @Value("\${jwt.authenticationToken.expirationTime}")
+    val accessExpirationTime: Long,
+    @Value("\${jwt.refreshToken.secret}")
+    val refreshSecret: String,
+    @Value("\${jwt.refreshToken.expirationTime}")
+    val refreshExpirationTime: Long,
     val userDetailsService: UserDetailsService
 ) {
 

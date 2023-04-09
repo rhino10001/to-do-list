@@ -1,9 +1,10 @@
 package rhino10001.todolist.service.impl
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import rhino10001.todolist.dto.user.UserDTO
-import rhino10001.todolist.dto.user.toEntity
+import rhino10001.todolist.dto.UserDTO
+import rhino10001.todolist.dto.toEntity
 import rhino10001.todolist.model.RoleEntity
 import rhino10001.todolist.model.toDTO
 import rhino10001.todolist.repository.RoleRepository
@@ -14,13 +15,14 @@ import rhino10001.todolist.service.UserService
 class UserServiceImpl @Autowired constructor(
     val userRepository: UserRepository,
     val roleRepository: RoleRepository,
-//    val passwordEncoder: PasswordEncoder
+    val passwordEncoder: PasswordEncoder
 ) : UserService {
 
     override fun register(user: UserDTO): UserDTO {
         val roleUser = roleRepository.findByType(RoleEntity.Type.USER).toDTO()
         val copy = user.copy(
-            roles = listOf(roleUser)
+            roles = listOf(roleUser),
+            password = passwordEncoder.encode(user.password)
         )
         return userRepository.save(copy.toEntity()).toDTO()
     }

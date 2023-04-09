@@ -1,7 +1,7 @@
 package rhino10001.todolist.model
 
 import jakarta.persistence.*
-import rhino10001.todolist.dto.role.RoleDTO
+import rhino10001.todolist.dto.RoleDTO
 
 @Entity
 @Table(name = "roles")
