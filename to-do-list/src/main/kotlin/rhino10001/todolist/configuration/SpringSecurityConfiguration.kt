@@ -33,6 +33,7 @@ class SpringSecurityConfiguration @Autowired constructor(
             .requestMatchers(HttpMethod.GET, "/api/v0/hello").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/v0/registration").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/v0/login").permitAll()
+            .requestMatchers(HttpMethod.POST, "/api/v0/refreshToken").permitAll()
             .anyRequest().authenticated()
 
         http.addFilterBefore(JwtTokenFilter(jwtUtils), UsernamePasswordAuthenticationFilter::class.java)

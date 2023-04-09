@@ -13,7 +13,7 @@ class JwtTokenFilter(
 
     override fun doFilter(request: ServletRequest?, response: ServletResponse?, chain: FilterChain?) {
         val token = jwtUtils.extractToken(request = request as HttpServletRequest)
-        if (jwtUtils.validateToken(token)) {
+        if (jwtUtils.validateAccessToken(token)) {
             SecurityContextHolder.getContext().authentication = jwtUtils.getAuthentication(token)
         }
         chain?.doFilter(request, response)
