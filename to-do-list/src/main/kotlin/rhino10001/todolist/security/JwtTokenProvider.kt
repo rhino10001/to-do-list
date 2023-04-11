@@ -1,9 +1,8 @@
 package rhino10001.todolist.security
 
-import io.jsonwebtoken.ExpiredJwtException
+import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
-import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -14,7 +13,7 @@ import rhino10001.todolist.dto.RoleDTO
 import java.util.*
 
 @Component
-data class JwtUtils @Autowired constructor(
+data class JwtTokenProvider @Autowired constructor(
 
     @Value("\${jwt.authenticationToken.secret}")
     val accessSecret: String,
@@ -44,11 +43,9 @@ data class JwtUtils @Autowired constructor(
         try {
             val claims = Jwts.parserBuilder().setSigningKey(accessSecret.toByteArray()).build().parseClaimsJws(token)
             if (claims.body.expiration.after(Date())) return true
-        } catch (e: Exception) {
-            when(e) {
-                is ExpiredJwtException, is IllegalArgumentException -> throw JwtAuthenticationException("Token not valid")
-            }
-        }
+        } catch (_: JwtException) {
+        } catch (_: IllegalArgumentException) {
+        } catch (_: ClassCastException) {}
         return false
     }
 
@@ -75,11 +72,9 @@ data class JwtUtils @Autowired constructor(
         try {
             val claims = Jwts.parserBuilder().setSigningKey(refreshSecret.toByteArray()).build().parseClaimsJws(token)
             if (claims.body.expiration.after(Date())) return true
-        } catch (e: Exception) {
-            when(e) {
-                is ExpiredJwtException, is IllegalArgumentException -> throw JwtAuthenticationException("Token not valid")
-            }
-        }
+        } catch (_: JwtException) {
+        } catch (_: IllegalArgumentException) {
+        } catch (_: ClassCastException) {}
         return false
     }
 
@@ -93,11 +88,5 @@ data class JwtUtils @Autowired constructor(
     fun getAuthentication(token: String): Authentication? {
         val userDetails = userDetailsService.loadUserByUsername(getUsernameFromAccessToken(token))
         return UsernamePasswordAuthenticationToken(userDetails, "", userDetails.authorities)
-    }
-
-    fun extractToken(request: HttpServletRequest): String {
-        val authHeader = request.getHeader("Authorization")
-        val prefix = "Bearer "
-        return if (authHeader != null && authHeader.startsWith(prefix)) authHeader.substring(prefix.length) else "invalidToken"
     }
 }

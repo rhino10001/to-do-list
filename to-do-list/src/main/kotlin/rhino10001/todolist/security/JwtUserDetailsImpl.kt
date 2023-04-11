@@ -6,8 +6,10 @@ import rhino10001.todolist.dto.RoleDTO
 
 class JwtUserDetailsImpl(
     val id: Long = 0,
-    @JvmField val username: String = "",
-    @JvmField val password: String = "",
+    @JvmField
+    val username: String = "",
+    @JvmField
+    val password: String = "",
     val roles: List<RoleDTO> = listOf()
 ): UserDetails {
 

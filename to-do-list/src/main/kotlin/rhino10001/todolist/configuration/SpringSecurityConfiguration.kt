@@ -13,19 +13,24 @@ import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import rhino10001.todolist.exception.ExceptionHandler
+import rhino10001.todolist.model.RoleEntity
 import rhino10001.todolist.security.JwtTokenFilter
-import rhino10001.todolist.security.JwtUtils
+import rhino10001.todolist.security.JwtTokenProvider
 
 
 @Configuration
 @EnableWebSecurity
 class SpringSecurityConfiguration @Autowired constructor(
+    private val exceptionHandler: ExceptionHandler,
     @Lazy
-    private val jwtUtils: JwtUtils
+    private val jwtUtils: JwtTokenProvider
 ) {
 
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
+        http
+            .addFilterBefore(JwtTokenFilter(jwtUtils), UsernamePasswordAuthenticationFilter::class.java)
         http
             .httpBasic().disable()
             .csrf().disable()
@@ -36,9 +41,13 @@ class SpringSecurityConfiguration @Autowired constructor(
             .requestMatchers(HttpMethod.POST, "/api/v0/auth/registration").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/v0/auth/login").permitAll()
             .requestMatchers(HttpMethod.POST, "/api/v0/auth/refresh").permitAll()
+            .and()
+            .authorizeHttpRequests()
+            .requestMatchers(HttpMethod.GET, "/api/v0/admin").hasAuthority(RoleEntity.Type.ADMIN.name)
             .anyRequest().authenticated()
+            .and()
+            .exceptionHandling().authenticationEntryPoint(exceptionHandler).accessDeniedHandler(exceptionHandler)
 
-        http.addFilterBefore(JwtTokenFilter(jwtUtils), UsernamePasswordAuthenticationFilter::class.java)
         return http.build()
     }
 

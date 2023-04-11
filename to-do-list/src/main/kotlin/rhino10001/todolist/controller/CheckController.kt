@@ -11,6 +11,9 @@ class CheckController {
     @GetMapping("/hello")
     fun hello() = "Hello world!"
 
-    @GetMapping("/registration")
-    fun register() = "RegistrationPage!!"
+    @GetMapping("/helloAuthenticated")
+    fun helloAuthenticated() = "Hello Authenticated!"
+
+    @GetMapping("/admin")
+    fun register() = "Info Only For Admin!!"
 }
