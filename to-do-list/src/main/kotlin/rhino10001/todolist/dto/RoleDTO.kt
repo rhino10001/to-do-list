@@ -5,7 +5,7 @@ import rhino10001.todolist.model.UserEntity
 
 data class RoleDTO(
     val id: Long = 0,
-    val type: RoleEntity.Type = RoleEntity.Type.USER,
+    val type: RoleEntity.Type = RoleEntity.Type.ROLE_USER,
     val users: List<UserEntity> = listOf()
 )
 

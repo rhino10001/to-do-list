@@ -63,7 +63,7 @@ class CheckControllerTest @Autowired constructor(
     }
 
     @Test
-    @WithMockUser(authorities = ["ADMIN"])
+    @WithMockUser(roles = ["ADMIN"])
     fun givenAdmin_whenAdmin_thenReturnSucceed() {
 
         mockMvc

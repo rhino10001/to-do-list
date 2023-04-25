@@ -21,7 +21,7 @@ data class RoleEntity(
 ) {
 
     enum class Type {
-        USER, ADMIN
+        ROLE_USER, ROLE_ADMIN
     }
 }
 

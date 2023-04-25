@@ -131,7 +131,7 @@ class AuthenticationTest @Autowired constructor(
 //        when
         val foundUser = UserDTO(
             username = userRequest.username,
-            roles = listOf(RoleDTO(type = RoleEntity.Type.USER))
+            roles = listOf(RoleDTO(type = RoleEntity.Type.ROLE_USER))
         )
         `when`(userService.findByUsername(userRequest.username)).thenReturn(foundUser)
 
@@ -238,7 +238,7 @@ class AuthenticationTest @Autowired constructor(
 
         val foundUser = UserDTO(
             username = extractedUsername,
-            roles = listOf(RoleDTO(type = RoleEntity.Type.USER))
+            roles = listOf(RoleDTO(type = RoleEntity.Type.ROLE_USER))
         )
         `when`(userService.findByUsername(extractedUsername)).thenReturn(foundUser)
 
