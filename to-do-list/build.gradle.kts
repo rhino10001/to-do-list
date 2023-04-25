@@ -36,7 +36,9 @@ dependencies {
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
 	runtimeOnly("io.jsonwebtoken:jjwt-orgjson:0.11.5")
 	annotationProcessor("org.projectlombok:lombok")
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.springframework.boot:spring-boot-starter-test") {
+		exclude(group = "com.vaadin.external.google", module = "android-json")
+	}
 	testImplementation("org.springframework.security:spring-security-test")
 }
 
