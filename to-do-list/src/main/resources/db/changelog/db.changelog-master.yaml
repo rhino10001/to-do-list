@@ -1,20 +1,82 @@
 databaseChangeLog:
 
   - changeSet:
-      id: DEV-1
+      id: DEV-0.0.1
       author: rhino10001
       changes:
         - createTable:
-            tableName: user
+            tableName: users
             remarks: users
             columns:
               - column:
                   name: id
                   type: bigserial
-                  autoIncrement: true
                   constraints:
                     primaryKey: true
                     primaryKeyName: pk_user
               - column:
-                  name: email
+                  name: username
                   type: varchar(100)
+                  constraints:
+                    unique: true
+                    nullable: false
+              - column:
+                  name: password
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+  - changeSet:
+      id: DEV-0.0.2
+      author: rhino10001
+      changes:
+        - createTable:
+            tableName: roles
+            remarks: roles
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_role
+              - column:
+                  name: type
+                  type: varchar(100)
+                  constraints:
+                    unique: true
+                    nullable: false
+  - changeSet:
+      id: DEV-0.0.3
+      author: rhino10001
+      changes:
+        - createTable:
+            tableName: users_roles
+            remarks: users_roles
+            columns:
+              - column:
+                  name: user_id
+                  type: bigserial
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role_id
+                  type: bigserial
+                  constraints:
+                    nullable: false
+  - changeSet:
+      id: DEV-0.0.4
+      author: rhino10001
+      comment: "Roles insertion"
+      changes:
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: type
+                  value: "ROLE_ADMIN"
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: type
+                  value: "ROLE_USER"

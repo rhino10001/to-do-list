@@ -40,6 +40,7 @@ dependencies {
 		exclude(group = "com.vaadin.external.google", module = "android-json")
 	}
 	testImplementation("org.springframework.security:spring-security-test")
+	testImplementation("com.h2database:h2:2.1.214")
 }
 
 tasks.withType<KotlinCompile> {
