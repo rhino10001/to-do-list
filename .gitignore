@@ -36,3 +36,4 @@ out/
 ### VS Code ###
 .vscode/
 /to-do-list/src/main/resources/application.yml
+/to-do-list/src/test/resources/application.yml
