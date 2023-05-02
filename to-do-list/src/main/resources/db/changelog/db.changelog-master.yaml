@@ -4,17 +4,17 @@ databaseChangeLog:
       id: DEV-1
       author: rhino10001
       changes:
-        - createTable:
-            tableName: user
-            remarks: users
-            columns:
-              - column:
-                  name: id
-                  type: bigserial
-                  autoIncrement: true
-                  constraints:
-                    primaryKey: true
-                    primaryKeyName: pk_user
-              - column:
-                  name: email
-                  type: varchar(100)
+#        - createTable:
+#            tableName: user
+#            remarks: users
+#            columns:
+#              - column:
+#                  name: id
+#                  type: bigserial
+#                  autoIncrement: true
+#                  constraints:
+#                    primaryKey: true
+#                    primaryKeyName: pk_user
+#              - column:
+#                  name: email
+#                  type: varchar(100)
