@@ -1,0 +1,18 @@
+jwt:
+  authenticationToken:
+    expirationTime: "secret.jwt.authenticationToken.expirationTime"
+    secret: "secret.jwt.authenticationToken.secret"
+  refreshToken:
+    expirationTime: "secret.jwt.refreshToken.expirationTime"
+    secret: "secret.jwt.refreshToken.secret"
+
+server:
+  port: "secret.server.port"
+
+spring:
+  database:
+    driverClassName: "secret.spring.database.driverClassName"
+  datasource:
+    url: "secret.spring.datasource.url"
+    username: "secret.spring.datasource.username"
+    password: "secret.spring.datasource.password"

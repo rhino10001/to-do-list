@@ -22,6 +22,32 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Secrets Substitution
+        uses: jacobtomlinson/gha-find-replace@v3
+        with:
+          find: "secret.server.port"
+          replace: "${{ secrets.SERVER_PORT }}"
+          include: "to-do-list/src/main/resources/application.yml"
+          regex: false
+      - uses: jacobtomlinson/gha-find-replace@v3
+        with:
+          find: "secret.spring.datasource.url"
+          replace: "${{ secrets.SPRING_DATASOURCE_URL }}"
+          include: "to-do-list/src/main/resources/application.yml"
+          regex: false
+      - uses: jacobtomlinson/gha-find-replace@v3
+        with:
+          find: "secret.spring.datasource.username"
+          replace: "${{ secrets.SPRING_DATASOURCE_USERNAME }}"
+          include: "to-do-list/src/main/resources/application.yml"
+          regex: false
+      - uses: jacobtomlinson/gha-find-replace@v3
+        with:
+          find: "secret.spring.datasource.password"
+          replace: "${{ secrets.SPRING_DATASOURCE_PASSWORD }}"
+          include: "to-do-list/src/main/resources/application.yml"
+          regex: false
+
       - name: Gradle Build
         run: |
           cd ./to-do-list
