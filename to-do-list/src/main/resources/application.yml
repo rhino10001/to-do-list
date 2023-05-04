@@ -1,0 +1,18 @@
+jwt:
+  authenticationToken:
+    expirationTime: "${ JWT_AUTHENTICATION_TOKEN_EXPIRATION_TIME }"
+    secret: "${ JWT_AUTHENTICATION_TOKEN_SECRET }"
+  refreshToken:
+    expirationTime: "${ JWT_REFRESH_TOKEN_EXPIRATION_TIME }"
+    secret: "${ JWT_REFRESH_TOKEN_SECRET }"
+
+server:
+  port: "${ SERVER_PORT }"
+
+spring:
+  database:
+    driverClassName: "${ SPRING_DATABASE_DRIVER_CLASS_NAME }"
+  datasource:
+    url: "jdbc:postgresql://postgres:5432/${ DATABASE_NAME }"
+    username: "${ DATABASE_USERNAME }"
+    password: "${ DATABASE_PASSWORD }"
