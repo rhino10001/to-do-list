@@ -14,7 +14,12 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: ${{ secrets.DATABASE_USERNAME }}
+          POSTGRES_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: ${{ secrets.DATABASE_NAME }}
+        ports:
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -37,34 +42,13 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Secrets Substitution
-        uses: jacobtomlinson/gha-find-replace@v3
+        uses: Lambdaspire/action-substitute-secrets-in-file@v1.0.0
         with:
-          find: "secret.server.port"
-          replace: "${{ secrets.SERVER_PORT }}"
-          include: "to-do-list/src/main/resources/application.yml"
-          regex: false
-      - uses: jacobtomlinson/gha-find-replace@v3
-        with:
-          find: "secret.spring.datasource.url"
-          replace: "${{ secrets.SPRING_DATASOURCE_URL }}"
-          include: "to-do-list/src/main/resources/application.yml"
-          regex: false
-      - uses: jacobtomlinson/gha-find-replace@v3
-        with:
-          find: "secret.spring.datasource.username"
-          replace: "${{ secrets.SPRING_DATASOURCE_USERNAME }}"
-          include: "to-do-list/src/main/resources/application.yml"
-          regex: false
-      - uses: jacobtomlinson/gha-find-replace@v3
-        with:
-          find: "secret.spring.datasource.password"
-          replace: "${{ secrets.SPRING_DATASOURCE_PASSWORD }}"
-          include: "to-do-list/src/main/resources/application.yml"
-          regex: false
+          file: to-do-list/src/main/resources/application.yml
+          tokenPattern: ${ TOKEN }
+          secretsJson: ${{ toJSON(secrets) }}
 
       - name: Build
         run: |
-          ls -R
-          gradle -v
           cd ./to-do-list
           gradle build

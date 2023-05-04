@@ -1,18 +1,18 @@
 jwt:
   authenticationToken:
-    expirationTime: "secret.jwt.authenticationToken.expirationTime"
-    secret: "secret.jwt.authenticationToken.secret"
+    expirationTime: "${ JWT_AUTHENTICATION_TOKEN_EXPIRATION_TIME }"
+    secret: "${ JWT_AUTHENTICATION_TOKEN_SECRET }"
   refreshToken:
-    expirationTime: "secret.jwt.refreshToken.expirationTime"
-    secret: "secret.jwt.refreshToken.secret"
+    expirationTime: "${ JWT_REFRESH_TOKEN_EXPIRATION_TIME }"
+    secret: "${ JWT_REFRESH_TOKEN_SECRET }"
 
 server:
-  port: "secret.server.port"
+  port: "${ SERVER_PORT }"
 
 spring:
   database:
-    driverClassName: "secret.spring.database.driverClassName"
+    driverClassName: "${ SPRING_DATABASE_DRIVER_CLASS_NAME }"
   datasource:
-    url: "secret.spring.datasource.url"
-    username: "secret.spring.datasource.username"
-    password: "secret.spring.datasource.password"
+    url: "jdbc:postgresql://postgres:5432/${ DATABASE_NAME }"
+    username: "${ DATABASE_USERNAME }"
+    password: "${ DATABASE_PASSWORD }"
