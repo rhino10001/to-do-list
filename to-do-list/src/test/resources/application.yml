@@ -1,0 +1,18 @@
+jwt:
+  authenticationToken:
+    expirationTime: "${ TEST_JWT_AUTHENTICATION_TOKEN_EXPIRATION_TIME }"
+    secret: "${ TEST_JWT_AUTHENTICATION_TOKEN_SECRET }"
+  refreshToken:
+    expirationTime: "${ TEST_JWT_REFRESH_TOKEN_EXPIRATION_TIME }"
+    secret: "${ TEST_JWT_REFRESH_TOKEN_SECRET }"
+
+server:
+  port: "${ TEST_SERVER_PORT }"
+
+spring:
+  database:
+    driverClassName: "${ TEST_SPRING_DATABASE_DRIVER_CLASS_NAME }"
+  datasource:
+    url: "jdbc:postgresql://postgres:5432/${ TEST_DATABASE_NAME }"
+    username: "${ TEST_DATABASE_USERNAME }"
+    password: "${ TEST_DATABASE_PASSWORD }"
