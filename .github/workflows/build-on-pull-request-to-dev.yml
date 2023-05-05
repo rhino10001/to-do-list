@@ -48,6 +48,13 @@ jobs:
           tokenPattern: ${ TOKEN }
           secretsJson: ${{ toJSON(secrets) }}
 
+      - name: Test Secrets Substitution
+        uses: Lambdaspire/action-substitute-secrets-in-file@v1.0.0
+        with:
+          file: to-do-list/src/test/resources/application.yml
+          tokenPattern: ${ TOKEN }
+          secretsJson: ${{ toJSON(secrets) }}
+
       - name: Build
         run: |
           cd ./to-do-list
