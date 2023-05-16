@@ -1,0 +1,67 @@
+name: Build and push docker container on PR in dev
+run-name: ${{ github.actor }} is building docker container on PR in dev🚀
+
+on:
+#  pull_request:
+  push:
+    branches:
+#      - 'dev'
+      - 'feature/wf-docker'
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: ${{ secrets.DATABASE_USERNAME }}
+          POSTGRES_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: ${{ secrets.DATABASE_NAME }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Make gradlew executable
+        run: chmod +x to-do-list/gradlew
+
+      - name: Secrets Substitution
+        uses: Lambdaspire/action-substitute-secrets-in-file@v1.0.0
+        with:
+          file: to-do-list/src/main/resources/application.yml
+          tokenPattern: ${ TOKEN }
+          secretsJson: ${{ toJSON(secrets) }}
+
+      - name: Test Secrets Substitution
+        uses: Lambdaspire/action-substitute-secrets-in-file@v1.0.0
+        with:
+          file: to-do-list/src/test/resources/application.yml
+          tokenPattern: ${ TOKEN }
+          secretsJson: ${{ toJSON(secrets) }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      -
+        name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/to-do-list:dev
