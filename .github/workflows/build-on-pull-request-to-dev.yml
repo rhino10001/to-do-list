@@ -60,4 +60,5 @@ jobs:
       - name: Build
         run: |
           cd ./to-do-list
-          gradle build
+          chmod +x ./gradlew
+          ./gradlew build
