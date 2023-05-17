@@ -2,9 +2,11 @@ name: Build on PR in dev
 run-name: ${{ github.actor }} is building on PR in dev🚀
 
 on:
-  pull_request:
+#  pull_request:
+  push:
     branches:
-      - 'dev'
+#      - 'dev'
+      - 'feature/wf-build-on-pr-fix'
 
 jobs:
   Build:
