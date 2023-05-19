@@ -13,6 +13,6 @@ spring:
   database:
     driverClassName: "${ TEST_SPRING_DATABASE_DRIVER_CLASS_NAME }"
   datasource:
-    url: "jdbc:postgresql://postgres:5432/${ TEST_DATABASE_NAME }"
+    url: "jdbc:postgresql://${ TEST_DATABASE_HOST }:5432/${ TEST_DATABASE_NAME }"
     username: "${ TEST_DATABASE_USERNAME }"
     password: "${ TEST_DATABASE_PASSWORD }"

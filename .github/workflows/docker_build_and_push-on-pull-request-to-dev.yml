@@ -2,18 +2,18 @@ name: Build and push docker container on PR in dev
 run-name: ${{ github.actor }} is building docker container on PR in dev🚀
 
 on:
-#  pull_request:
+  #pull_request:
   push:
     branches:
-#      - 'dev'
+      #- 'dev'
       - 'feature/wf-docker'
 
 jobs:
-  build:
+  docker_build_dev:
     runs-on: ubuntu-22.04
     services:
       postgres:
-        image: postgres:15
+        image: postgres:15-alpine
         env:
           POSTGRES_USER: ${{ secrets.DATABASE_USERNAME }}
           POSTGRES_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
@@ -28,12 +28,8 @@ jobs:
           --health-retries 5
 
     steps:
-      -
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v3
-
-      - name: Make gradlew executable
-        run: chmod +x to-do-list/gradlew
 
       - name: Secrets Substitution
         uses: Lambdaspire/action-substitute-secrets-in-file@v1.0.0
@@ -54,14 +50,18 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      -
-        name: Set up Docker Buildx
+
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-      -
-        name: Build and push
+
+      - name: Make gradlew executable
+        run: chmod +x ./to-do-list/gradlew
+
+      - name: Build and push
         uses: docker/build-push-action@v4
         with:
           context: .
           file: ./Dockerfile
+          target: dev
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/to-do-list:dev
