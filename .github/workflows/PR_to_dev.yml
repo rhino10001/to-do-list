@@ -9,11 +9,11 @@ on:
       - 'feature/wf-docker'
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-22.04
     services:
       postgres:
-        image: postgres:15
+        image: postgres:15-alpine
         env:
           POSTGRES_USER: ${{ secrets.DATABASE_USERNAME }}
           POSTGRES_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
@@ -55,11 +55,11 @@ jobs:
         run: |
           cd ./to-do-list
           chmod +x ./gradlew
-          ./gradlew build
+          ./gradlew test
 
   docker_build_dev:
     runs-on: ubuntu-22.04
-    needs: build
+    needs: test
     services:
       postgres:
         image: postgres:15-alpine
