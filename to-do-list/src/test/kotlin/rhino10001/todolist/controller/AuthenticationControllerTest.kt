@@ -35,7 +35,7 @@ import rhino10001.todolist.service.UserService
 
 @WebMvcTest(AuthenticationController::class)
 @Import(SpringSecurityConfiguration::class)
-class AuthenticationTest @Autowired constructor(
+class AuthenticationControllerTest @Autowired constructor(
 
     @MockBean
     private val userService: UserService,
