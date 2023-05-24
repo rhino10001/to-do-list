@@ -53,3 +53,15 @@ tasks.withType<KotlinCompile> {
 tasks.withType<Test> {
 	useJUnitPlatform()
 }
+
+tasks.register("projectVersion") {
+	doLast {
+		println(project.version)
+	}
+}
+
+tasks.register("projectName") {
+	doLast {
+		println(project.name)
+	}
+}

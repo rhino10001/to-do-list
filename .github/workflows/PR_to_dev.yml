@@ -2,14 +2,12 @@ name: Tests, build and push docker container on PR in dev
 run-name: ${{ github.actor }} is pushing docker container🚀
 
 on:
-  #pull_request:
-  push:
+  pull_request:
     branches:
-      #- 'dev'
-      - 'feature/wf-docker'
+      - 'dev'
 
 jobs:
-  test:
+  test-build-push:
     runs-on: ubuntu-22.04
     services:
       postgres:
@@ -57,43 +55,6 @@ jobs:
           chmod +x ./gradlew
           ./gradlew test
 
-  docker_build_dev:
-    runs-on: ubuntu-22.04
-    needs: test
-    services:
-      postgres:
-        image: postgres:15-alpine
-        env:
-          POSTGRES_USER: ${{ secrets.DATABASE_USERNAME }}
-          POSTGRES_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-          POSTGRES_PORT: 5432
-          POSTGRES_DB: ${{ secrets.DATABASE_NAME }}
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Secrets Substitution
-        uses: Lambdaspire/action-substitute-secrets-in-file@v1.0.0
-        with:
-          file: to-do-list/src/main/resources/application.yml
-          tokenPattern: ${ TOKEN }
-          secretsJson: ${{ toJSON(secrets) }}
-
-      - name: Test Secrets Substitution
-        uses: Lambdaspire/action-substitute-secrets-in-file@v1.0.0
-        with:
-          file: to-do-list/src/test/resources/application.yml
-          tokenPattern: ${ TOKEN }
-          secretsJson: ${{ toJSON(secrets) }}
-
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
@@ -103,14 +64,18 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Make gradlew executable
-        run: chmod +x ./to-do-list/gradlew
+      - name: Get project name and version
+        id: get-data
+        run: |
+          cd ./to-do-list
+          echo "PROJECT_VERSION=$(./gradlew -q projectVersion)" >> $GITHUB_OUTPUT
+          echo "PROJECT_NAME=$(./gradlew -q projectName)" >> $GITHUB_OUTPUT
 
-      - name: Build and push
+      - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
           context: .
           file: ./Dockerfile
           target: dev
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/to-do-list:dev
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ steps.get-data.outputs.PROJECT_NAME }}:${{ steps.get-data.outputs.PROJECT_VERSION }}-dev
