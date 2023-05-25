@@ -1,6 +1,7 @@
 package rhino10001.todolist.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
@@ -15,9 +16,7 @@ import org.springframework.security.authentication.InternalAuthenticationService
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.test.context.support.WithAnonymousUser
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.test.web.servlet.post
 import rhino10001.todolist.configuration.SpringSecurityConfiguration
 import rhino10001.todolist.dto.RoleDTO
 import rhino10001.todolist.dto.UserDTO
@@ -70,21 +69,23 @@ class AuthenticationControllerTest @Autowired constructor(
         )
         `when`(userService.register(userRequest.toUserDTO())).thenReturn(createdUserDTO)
 
-        val result = mockMvc.perform(
-            post("/api/v0/auth/registration")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRequest))
-        )
+        val result = mockMvc
+            .post("/api/v0/auth/registration") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(userRequest)
+            }
 
-//        then
+        //        then
         val expectedResponse = RegistrationResponse(
             id = 1,
             username = userRequest.username
         )
 
         result
-            .andExpect(status().`is`(201))
-            .andExpect(content().string(objectMapper.writeValueAsString(expectedResponse)))
+            .andExpect {
+                status { `is`(201) }
+                content { string(objectMapper.writeValueAsString(expectedResponse)) }
+            }
     }
 
     @Test
@@ -101,11 +102,11 @@ class AuthenticationControllerTest @Autowired constructor(
         val exception = DataIntegrityViolationException("Indifferently")
         `when`(userService.register(userRequest.toUserDTO())).thenThrow(exception)
 
-        val result = mockMvc.perform(
-            post("/api/v0/auth/registration")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRequest))
-        )
+        val result = mockMvc
+            .post("/api/v0/auth/registration") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(userRequest)
+            }
 
 //        then
         val expectedResponse = ExceptionResponse(
@@ -114,8 +115,10 @@ class AuthenticationControllerTest @Autowired constructor(
         )
 
         result
-            .andExpect(status().`is`(422))
-            .andExpect(content().string(objectMapper.writeValueAsString(expectedResponse)))
+            .andExpect {
+                status { `is`(422) }
+                content { string(objectMapper.writeValueAsString(expectedResponse)) }
+            }
     }
 
     @Test
@@ -141,11 +144,11 @@ class AuthenticationControllerTest @Autowired constructor(
         val refreshToken = "test_refresh_token"
         `when`(jwtTokenProvider.generateRefreshToken(foundUser.username)).thenReturn(refreshToken)
 
-        val result = mockMvc.perform(
-            post("/api/v0/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRequest))
-        )
+        val result = mockMvc
+            .post("/api/v0/auth/login") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(userRequest)
+            }
 
 //        then
         val expectedResponse = LoginResponse(
@@ -155,8 +158,10 @@ class AuthenticationControllerTest @Autowired constructor(
         )
 
         result
-            .andExpect(status().`is`(200))
-            .andExpect(content().string(objectMapper.writeValueAsString(expectedResponse)))
+            .andExpect {
+                status { `is`(200) }
+                content { string(objectMapper.writeValueAsString(expectedResponse)) }
+            }
     }
 
     @Test
@@ -174,11 +179,11 @@ class AuthenticationControllerTest @Autowired constructor(
         val exception = InternalAuthenticationServiceException("Indifferently")
         `when`(authenticationManager.authenticate(authentication)).thenThrow(exception)
 
-        val result = mockMvc.perform(
-            post("/api/v0/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRequest))
-        )
+        val result = mockMvc
+            .post("/api/v0/auth/login") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(userRequest)
+            }
 
 //        then
         val expectedResponse = ExceptionResponse(
@@ -187,8 +192,10 @@ class AuthenticationControllerTest @Autowired constructor(
         )
 
         result
-            .andExpect(status().`is`(401))
-            .andExpect(content().string(objectMapper.writeValueAsString(expectedResponse)))
+            .andExpect {
+                status { `is`(401) }
+                content { string(objectMapper.writeValueAsString(expectedResponse)) }
+            }
     }
 
     @Test
@@ -206,11 +213,11 @@ class AuthenticationControllerTest @Autowired constructor(
         val exception = BadCredentialsException("Indifferently")
         `when`(authenticationManager.authenticate(authentication)).thenThrow(exception)
 
-        val result = mockMvc.perform(
-            post("/api/v0/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRequest))
-        )
+        val result = mockMvc
+            .post("/api/v0/auth/login") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(userRequest)
+            }
 
 //        then
         val expectedResponse = ExceptionResponse(
@@ -219,8 +226,10 @@ class AuthenticationControllerTest @Autowired constructor(
         )
 
         result
-            .andExpect(status().`is`(401))
-            .andExpect(content().string(objectMapper.writeValueAsString(expectedResponse)))
+            .andExpect {
+                status { `is`(401) }
+                content { string(objectMapper.writeValueAsString(expectedResponse)) }
+            }
     }
 
     @Test
@@ -248,11 +257,11 @@ class AuthenticationControllerTest @Autowired constructor(
         val newRefreshToken = "test_new_refresh_token"
         `when`(jwtTokenProvider.generateRefreshToken(foundUser.username)).thenReturn(newRefreshToken)
 
-        val result = mockMvc.perform(
-            post("/api/v0/auth/refresh")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRequest))
-        )
+        val result = mockMvc
+            .post("/api/v0/auth/refresh") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(userRequest)
+            }
 
 //        then
         val expectedResponse = RefreshResponse(
@@ -261,8 +270,10 @@ class AuthenticationControllerTest @Autowired constructor(
         )
 
         result
-            .andExpect(status().`is`(200))
-            .andExpect(content().string(objectMapper.writeValueAsString(expectedResponse)))
+            .andExpect {
+                status { `is`(200) }
+                content { string(objectMapper.writeValueAsString(expectedResponse)) }
+            }
     }
 
     @Test
@@ -275,11 +286,11 @@ class AuthenticationControllerTest @Autowired constructor(
 //        when
         `when`(jwtTokenProvider.validateRefreshToken(userRequest.refreshToken)).thenReturn(false)
 
-        val result = mockMvc.perform(
-            post("/api/v0/auth/refresh")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRequest))
-        )
+        val result = mockMvc
+            .post("/api/v0/auth/refresh") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(userRequest)
+            }
 
 //        then
         val expectedResponse = ExceptionResponse(
@@ -288,7 +299,9 @@ class AuthenticationControllerTest @Autowired constructor(
         )
 
         result
-            .andExpect(status().`is`(401))
-            .andExpect(content().string(objectMapper.writeValueAsString(expectedResponse)))
+            .andExpect {
+                status { `is`(401) }
+                content { string(objectMapper.writeValueAsString(expectedResponse)) }
+            }
     }
 }

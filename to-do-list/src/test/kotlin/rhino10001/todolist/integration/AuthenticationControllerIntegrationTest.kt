@@ -11,6 +11,7 @@ import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.http.MediaType
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import rhino10001.todolist.dto.request.LoginRequest
@@ -44,7 +45,8 @@ class AuthenticationControllerIntegrationTest @Autowired constructor(
         try {
             val testUser = userRepository.findByUsername(testUsername)
             userRepository.delete(testUser)
-        } catch (ignored: EmptyResultDataAccessException) {}
+        } catch (ignored: EmptyResultDataAccessException) {
+        }
 
 //        given
         val userRequest = RegistrationRequest(
@@ -53,18 +55,20 @@ class AuthenticationControllerIntegrationTest @Autowired constructor(
         )
 
 //        when
-        val result = mockMvc.perform(
-            post("/api/v0/auth/registration")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRequest))
-        )
+        val result = mockMvc
+            .post("/api/v0/auth/registration") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(userRequest)
+            }
 
 //        then
         result
-            .andExpect(status().`is`(201))
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.id", notNullValue(Long::class.java)))
-            .andExpect(jsonPath("$.username", `is`(userRequest.username)))
+            .andExpect {
+                status { `is`(201) }
+                content { contentType(MediaType.APPLICATION_JSON) }
+                jsonPath("$.id", notNullValue(Long::class.java))
+                jsonPath("$.username", `is`(userRequest.username))
+            }
     }
 
     @Test
@@ -77,18 +81,20 @@ class AuthenticationControllerIntegrationTest @Autowired constructor(
         )
 
 //        when
-        val result = mockMvc.perform(
-            post("/api/v0/auth/registration")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRequest))
-        )
+        val result = mockMvc
+            .post("/api/v0/auth/registration") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(userRequest)
+            }
 
 //        then
         result
-            .andExpect(status().`is`(422))
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.statusCode", `is`(422)))
-            .andExpect(jsonPath("$.message", `is`("User with such username is already registered")))
+            .andExpect {
+                status { `is`(422) }
+                content { contentType(MediaType.APPLICATION_JSON) }
+                jsonPath("$.statusCode", `is`(422))
+                jsonPath("$.message", `is`("User with such username is already registered"))
+            }
     }
 
     @Test
@@ -101,19 +107,21 @@ class AuthenticationControllerIntegrationTest @Autowired constructor(
         )
 
 //        when
-        val result = mockMvc.perform(
-            post("/api/v0/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRequest))
-        )
+        val result = mockMvc
+            .post("/api/v0/auth/login") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(userRequest)
+            }
 
 //        then
         result
-            .andExpect(status().`is`(200))
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.username", `is`(userRequest.username)))
-            .andExpect(jsonPath("$.accessToken", notNullValue()))
-            .andExpect(jsonPath("$.refreshToken", notNullValue()))
+            .andExpect {
+                status { `is`(200) }
+                content { contentType(MediaType.APPLICATION_JSON) }
+                jsonPath("$.username", `is`(userRequest.username))
+                jsonPath("$.accessToken", notNullValue())
+                jsonPath("$.refreshToken", notNullValue())
+            }
     }
 
     @Test
@@ -126,18 +134,20 @@ class AuthenticationControllerIntegrationTest @Autowired constructor(
         )
 
 //        when
-        val result = mockMvc.perform(
-            post("/api/v0/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRequest))
-        )
+        val result = mockMvc
+            .post("/api/v0/auth/login") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(userRequest)
+            }
 
 //        then
         result
-            .andExpect(status().`is`(401))
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.statusCode", `is`(401)))
-            .andExpect(jsonPath("$.message", `is`("Incorrect username")))
+            .andExpect {
+                status { `is`(401) }
+                content { contentType(MediaType.APPLICATION_JSON) }
+                jsonPath("$.statusCode", `is`(401))
+                jsonPath("$.message", `is`("Incorrect username"))
+            }
     }
 
     @Test
@@ -150,18 +160,20 @@ class AuthenticationControllerIntegrationTest @Autowired constructor(
         )
 
 //        when
-        val result = mockMvc.perform(
-            post("/api/v0/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRequest))
-        )
+        val result = mockMvc
+            .post("/api/v0/auth/login") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(userRequest)
+            }
 
 //        then
         result
-            .andExpect(status().`is`(401))
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.statusCode", `is`(401)))
-            .andExpect(jsonPath("$.message", `is`("Incorrect password")))
+            .andExpect {
+                status { `is`(401) }
+                content { contentType(MediaType.APPLICATION_JSON) }
+                jsonPath("$.statusCode", `is`(401))
+                jsonPath("$.message", `is`("Incorrect password"))
+            }
     }
 
     @Test
@@ -193,18 +205,20 @@ class AuthenticationControllerIntegrationTest @Autowired constructor(
         val userRequest = RefreshRequest(refreshToken = refreshToken)
 
 //        when
-        val result = mockMvc.perform(
-            post("/api/v0/auth/refresh")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRequest))
-        )
+        val result = mockMvc
+            .post("/api/v0/auth/refresh") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(userRequest)
+            }
 
 //        then
         result
-            .andExpect(status().`is`(200))
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.accessToken", notNullValue()))
-            .andExpect(jsonPath("$.refreshToken", notNullValue()))
+            .andExpect {
+                status { `is`(200) }
+                content { contentType(MediaType.APPLICATION_JSON) }
+                jsonPath("$.accessToken", notNullValue())
+                jsonPath("$.refreshToken", notNullValue())
+            }
     }
 
     @Test
@@ -216,20 +230,22 @@ class AuthenticationControllerIntegrationTest @Autowired constructor(
             password = testPassword
         )
 
-        val loginResult = mockMvc.perform(
-            post("/api/v0/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(loginRequest))
-        )
+        val loginResult = mockMvc
+            .post("/api/v0/auth/login") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(loginRequest)
+            }
 
         var refreshToken = ""
         loginResult
-            .andExpect(status().`is`(200))
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.refreshToken", notNullValue()))
+            .andExpect {
+                status { `is`(200) }
+                content { contentType(MediaType.APPLICATION_JSON) }
+                jsonPath("$.refreshToken", notNullValue())
+            }
             .andDo {
                 refreshToken = objectMapper
-                    .readValue(it.response.contentAsString, LoginResponse::class.java)
+                    .readValue(loginResult.andReturn().response.contentAsString, LoginResponse::class.java)
                     .refreshToken
             }
 
@@ -238,17 +254,19 @@ class AuthenticationControllerIntegrationTest @Autowired constructor(
 //        when
         Thread.sleep(refreshExpirationTime)
 
-        val result = mockMvc.perform(
-            post("/api/v0/auth/refresh")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRequest))
-        )
+        val result = mockMvc
+            .post("/api/v0/auth/refresh") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(userRequest)
+            }
 
 //        then
         result
-            .andExpect(status().`is`(401))
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.statusCode", `is`(401)))
-            .andExpect(jsonPath("$.message", `is`("Invalid refresh token")))
+            .andExpect {
+                status { `is`(401) }
+                content { contentType(MediaType.APPLICATION_JSON) }
+                jsonPath("$.statusCode", `is`(401))
+                jsonPath("$.message", `is`("Invalid refresh token"))
+            }
     }
 }
