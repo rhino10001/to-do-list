@@ -76,7 +76,7 @@ class JwtTokenProviderTest(
 //        then
         for (i in generatedAccessToken.indices) {
             val toReplace = generatedAccessToken[i]
-            val replacement = if (toReplace == 'A') 'B' else 'A'
+            val replacement = if (toReplace == 'A') 'Z' else 'A'
             val corrupted = generatedAccessToken.substring(0, i) +
                     replacement +
                     generatedAccessToken.substring(i + 1)
@@ -159,7 +159,7 @@ class JwtTokenProviderTest(
 //        then
         for (i in generatedRefreshToken.indices) {
             val toReplace = generatedRefreshToken[i]
-            val replacement = if (toReplace == 'A') 'B' else 'A'
+            val replacement = if (toReplace == 'A') 'Z' else 'A'
             val corrupted = generatedRefreshToken.substring(0, i) +
                     replacement +
                     generatedRefreshToken.substring(i + 1)
