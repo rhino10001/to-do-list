@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.junit.jupiter.MockitoExtension
@@ -30,14 +31,11 @@ class UserServiceImplTest(
     private val roleRepository: RoleRepository,
 
     @Mock
-    private val passwordEncoder: PasswordEncoder,
+    private val passwordEncoder: PasswordEncoder
 ) {
 
-    private val userService = UserServiceImpl(
-        userRepository = userRepository,
-        roleRepository = roleRepository,
-        passwordEncoder = passwordEncoder
-    )
+    @InjectMocks
+    private lateinit var userService: UserServiceImpl
 
     @Test
     fun givenNewUser_whenRegister_thenReturnsSameUserWithIdAndEncodedPasswordAndRoleUser() {

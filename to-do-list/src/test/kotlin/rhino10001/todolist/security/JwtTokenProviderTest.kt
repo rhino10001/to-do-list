@@ -21,9 +21,11 @@ class JwtTokenProviderTest(
 ) {
 
     private val jwtTokenProvider = JwtTokenProvider(
-        accessSecret = "test_access_secret_length_must_be_gte_hash_algorithm_output_length_256_bits_or_32_unicode_symbols_in_our_case",
+        accessSecret = "test_access_secret_length_must_be_gte_" +
+                "hash_algorithm_output_length_256_bits_or_32_unicode_symbols_in_our_case",
         accessExpirationTime = 2000,
-        refreshSecret = "test_refresh_secret_length_must_be_gte_hash_algorithm_output_length_256_bits_or_32_unicode_symbols_in_our_case",
+        refreshSecret = "test_refresh_secret_length_must_be_gte_" +
+                "hash_algorithm_output_length_256_bits_or_32_unicode_symbols_in_our_case",
         refreshExpirationTime = 3000,
         userDetailsService = userDetailsService
     )
