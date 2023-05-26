@@ -35,6 +35,15 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Get project name and version
+        id: get-data
+        run: |
+          cd ./to-do-list
+          echo "Project name is $(./gradlew -q projectName)"
+          echo "Project version is $(./gradlew -q projectVersion)"
+          echo "PROJECT_VERSION=$(./gradlew -q projectVersion)" >> $GITHUB_OUTPUT
+          echo "PROJECT_NAME=$(./gradlew -q projectName)" >> $GITHUB_OUTPUT
+
       - name: Secrets Substitution
         uses: Lambdaspire/action-substitute-secrets-in-file@v1.0.0
         with:
@@ -64,18 +73,10 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Get project name and version
-        id: get-data
-        run: |
-          cd ./to-do-list
-          echo "PROJECT_VERSION=$(./gradlew -q projectVersion)" >> $GITHUB_OUTPUT
-          echo "PROJECT_NAME=$(./gradlew -q projectName)" >> $GITHUB_OUTPUT
-
-      - name: Build and push Docker image
+      - name: Build and Docker image
         uses: docker/build-push-action@v4
         with:
           context: .
           file: ./Dockerfile
           target: dev
-          push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ steps.get-data.outputs.PROJECT_NAME }}:${{ steps.get-data.outputs.PROJECT_VERSION }}-dev
