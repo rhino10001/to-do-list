@@ -5,9 +5,12 @@ on:
   pull_request:
     branches:
       - 'dev'
+    types:
+      [closed]
 
 jobs:
-  test-build:
+  test-build-push:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-22.04
     services:
       postgres:
@@ -74,10 +77,11 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Build Docker image
+      - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
           context: .
           file: ./Dockerfile
+          push: true
           target: dev
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ steps.get-data.outputs.PROJECT_NAME }}:${{ steps.get-data.outputs.PROJECT_VERSION }}-dev
