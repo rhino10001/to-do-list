@@ -16,7 +16,7 @@ import rhino10001.todolist.model.UserEntity
 @DataJpaTest(showSql = false)
 class UserRepositoryTest @Autowired constructor(
     private val entityManager: TestEntityManager,
-    private val userRepository: UserRepository,
+    private val userRepository: UserRepository
 ) {
 
     @Test
@@ -95,7 +95,7 @@ class UserRepositoryTest @Autowired constructor(
             password = "test_encoded_password",
             roles = listOf(roleUser)
         )
-        
+
         assertEquals("ROLE_USER", roleUser.type.name)
         assertNotNull(registeredUserEntity.id)
         assertEquals(expected, foundUser)

@@ -1,5 +1,6 @@
 package rhino10001.todolist.security
 
+import io.jsonwebtoken.Claims
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
@@ -29,64 +30,52 @@ data class JwtTokenProvider @Autowired constructor(
     fun generateAccessToken(username: String, roles: List<RoleDTO>): String {
         val claims = Jwts.claims().setSubject(username)
         claims["roles"] = roles.map { it.type.name }
-        val nowDate = Date()
-        val expirationDate = Date(nowDate.time + accessExpirationTime)
-        return Jwts.builder()
-            .setClaims(claims)
-            .setIssuedAt(nowDate)
-            .setExpiration(expirationDate)
-            .signWith(SignatureAlgorithm.HS256, Base64.getEncoder().encodeToString(accessSecret.toByteArray()))
-            .compact()
-    }
-
-    fun validateAccessToken(token: String): Boolean {
-        try {
-            val claims = Jwts.parserBuilder().setSigningKey(accessSecret.toByteArray()).build().parseClaimsJws(token)
-            if (claims.body.expiration.after(Date())) return true
-        } catch (_: JwtException) {
-        } catch (_: IllegalArgumentException) {
-        } catch (_: ClassCastException) {}
-        return false
-    }
-
-    private fun getUsernameFromAccessToken(token: String): String {
-        return Jwts.parserBuilder()
-            .setSigningKey(accessSecret.toByteArray())
-            .build()
-            .parseClaimsJws(token).body.subject
+        return generateToken(claims, accessExpirationTime, accessSecret)
     }
 
     fun generateRefreshToken(username: String): String {
         val claims = Jwts.claims().setSubject(username)
+        return generateToken(claims, refreshExpirationTime, refreshSecret)
+    }
+
+    fun validateAccessToken(token: String) = validateToken(token, accessSecret)
+
+    fun validateRefreshToken(token: String) = validateToken(token, refreshSecret)
+
+    private fun getUsernameFromAccessToken(token: String) = parseSubject(token, accessSecret)
+
+    fun getUsernameFromRefreshToken(token: String) = parseSubject(token, refreshSecret)
+
+    fun getAuthentication(token: String): Authentication? {
+        val userDetails = userDetailsService.loadUserByUsername(getUsernameFromAccessToken(token))
+        return UsernamePasswordAuthenticationToken(userDetails, "", userDetails.authorities)
+    }
+
+    private fun parseSubject(token: String, secret: String): String {
+        return Jwts.parserBuilder()
+            .setSigningKey(secret.toByteArray())
+            .build()
+            .parseClaimsJws(token).body.subject
+    }
+
+    private fun generateToken(claims: Claims, expirationTime: Long, secret: String): String {
         val nowDate = Date()
-        val expirationDate = Date(nowDate.time + refreshExpirationTime)
+        val expirationDate = Date(nowDate.time + expirationTime)
         return Jwts.builder()
             .setClaims(claims)
             .setIssuedAt(nowDate)
             .setExpiration(expirationDate)
-            .signWith(SignatureAlgorithm.HS256, Base64.getEncoder().encodeToString(refreshSecret.toByteArray()))
+            .signWith(SignatureAlgorithm.HS256, Base64.getEncoder().encodeToString(secret.toByteArray()))
             .compact()
     }
 
-    fun validateRefreshToken(token: String): Boolean {
+    private fun validateToken(token: String, secret: String): Boolean {
         try {
-            val claims = Jwts.parserBuilder().setSigningKey(refreshSecret.toByteArray()).build().parseClaimsJws(token)
+            val claims = Jwts.parserBuilder().setSigningKey(secret.toByteArray()).build().parseClaimsJws(token)
             if (claims.body.expiration.after(Date())) return true
         } catch (_: JwtException) {
         } catch (_: IllegalArgumentException) {
         } catch (_: ClassCastException) {}
         return false
-    }
-
-    fun getUsernameFromRefreshToken(token: String): String {
-        return Jwts.parserBuilder()
-            .setSigningKey(refreshSecret.toByteArray())
-            .build()
-            .parseClaimsJws(token).body.subject
-    }
-
-    fun getAuthentication(token: String): Authentication? {
-        val userDetails = userDetailsService.loadUserByUsername(getUsernameFromAccessToken(token))
-        return UsernamePasswordAuthenticationToken(userDetails, "", userDetails.authorities)
     }
 }

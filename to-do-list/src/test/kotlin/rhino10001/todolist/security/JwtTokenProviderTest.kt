@@ -21,9 +21,11 @@ class JwtTokenProviderTest(
 ) {
 
     private val jwtTokenProvider = JwtTokenProvider(
-        accessSecret = "test_access_secret_length_must_be_gte_hash_algorithm_output_length_256_bits_or_32_unicode_symbols_in_our_case",
+        accessSecret = "test_access_secret_length_must_be_gte_" +
+                "hash_algorithm_output_length_256_bits_or_32_unicode_symbols_in_our_case",
         accessExpirationTime = 2000,
-        refreshSecret = "test_refresh_secret_length_must_be_gte_hash_algorithm_output_length_256_bits_or_32_unicode_symbols_in_our_case",
+        refreshSecret = "test_refresh_secret_length_must_be_gte_" +
+                "hash_algorithm_output_length_256_bits_or_32_unicode_symbols_in_our_case",
         refreshExpirationTime = 3000,
         userDetailsService = userDetailsService
     )
@@ -76,7 +78,7 @@ class JwtTokenProviderTest(
 //        then
         for (i in generatedAccessToken.indices) {
             val toReplace = generatedAccessToken[i]
-            val replacement = if (toReplace == 'A') 'B' else 'A'
+            val replacement = if (toReplace == 'A') 'Z' else 'A'
             val corrupted = generatedAccessToken.substring(0, i) +
                     replacement +
                     generatedAccessToken.substring(i + 1)
@@ -159,7 +161,7 @@ class JwtTokenProviderTest(
 //        then
         for (i in generatedRefreshToken.indices) {
             val toReplace = generatedRefreshToken[i]
-            val replacement = if (toReplace == 'A') 'B' else 'A'
+            val replacement = if (toReplace == 'A') 'Z' else 'A'
             val corrupted = generatedRefreshToken.substring(0, i) +
                     replacement +
                     generatedRefreshToken.substring(i + 1)

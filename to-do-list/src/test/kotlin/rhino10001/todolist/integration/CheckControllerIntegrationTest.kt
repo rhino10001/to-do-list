@@ -1,6 +1,7 @@
 package rhino10001.todolist.integration
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.hamcrest.Matchers.`is`
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -8,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.security.test.context.support.WithAnonymousUser
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -26,8 +28,10 @@ class CheckControllerIntegrationTest @Autowired constructor(
     @WithAnonymousUser
     fun givenAnonymous_whenHello_thenReturnSucceed() {
         mockMvc
-            .perform(get("/api/v0/hello"))
-            .andExpect(content().string("Hello world!"))
+            .get("/api/v0/hello")
+            .andExpect {
+                content { string("Hello world!") }
+            }
     }
 
     @Test
@@ -35,9 +39,11 @@ class CheckControllerIntegrationTest @Autowired constructor(
     fun givenUser_whenHelloAuthenticated_thenReturnSucceed() {
 
         mockMvc
-            .perform(get("/api/v0/helloAuthenticated"))
-            .andExpect(status().`is`(200))
-            .andExpect(content().string("Hello Authenticated!"))
+            .get("/api/v0/helloAuthenticated")
+            .andExpect {
+                status().`is`(200)
+                content { string("Hello Authenticated!") }
+            }
     }
 
     @Test
@@ -50,9 +56,11 @@ class CheckControllerIntegrationTest @Autowired constructor(
         )
 
         mockMvc
-            .perform(get("/api/v0/helloAuthenticated"))
-            .andExpect(status().`is`(401))
-            .andExpect(content().string(objectMapper.writeValueAsString(expectedResponse)))
+            .get("/api/v0/helloAuthenticated")
+            .andExpect {
+                status().`is`(401)
+                content { string(objectMapper.writeValueAsString(expectedResponse)) }
+            }
     }
 
     @Test
@@ -60,9 +68,11 @@ class CheckControllerIntegrationTest @Autowired constructor(
     fun givenAdmin_whenAdmin_thenReturnSucceed() {
 
         mockMvc
-            .perform(get("/api/v0/admin"))
-            .andExpect(status().`is`(200))
-            .andExpect(content().string("Info Only For Admin!!"))
+            .get("/api/v0/admin")
+            .andExpect {
+                status().`is`(200)
+                content { string("Info Only For Admin!!") }
+            }
     }
 
     @Test
@@ -75,9 +85,11 @@ class CheckControllerIntegrationTest @Autowired constructor(
         )
 
         mockMvc
-            .perform(get("/api/v0/admin"))
-            .andExpect(status().`is`(403))
-            .andExpect(content().string(objectMapper.writeValueAsString(expectedResponse)))
+            .get("/api/v0/admin")
+            .andExpect {
+                status { `is`(403) }
+                content { string(objectMapper.writeValueAsString(expectedResponse)) }
+            }
     }
 
     @Test
@@ -90,8 +102,10 @@ class CheckControllerIntegrationTest @Autowired constructor(
         )
 
         mockMvc
-            .perform(get("/api/v0/admin"))
-            .andExpect(status().`is`(401))
-            .andExpect(content().string(objectMapper.writeValueAsString(expectedResponse)))
+            .get("/api/v0/admin")
+            .andExpect {
+                status { `is`(401) }
+                content { string(objectMapper.writeValueAsString(expectedResponse)) }
+            }
     }
 }
