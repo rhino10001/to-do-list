@@ -39,6 +39,7 @@ jobs:
         id: get-data
         run: |
           cd ./to-do-list
+          chmod +x ./gradlew
           echo "Project name is $(./gradlew -q projectName)"
           echo "Project version is $(./gradlew -q projectVersion)"
           echo "PROJECT_VERSION=$(./gradlew -q projectVersion)" >> $GITHUB_OUTPUT
@@ -73,7 +74,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Build and Docker image
+      - name: Build Docker image
         uses: docker/build-push-action@v4
         with:
           context: .
