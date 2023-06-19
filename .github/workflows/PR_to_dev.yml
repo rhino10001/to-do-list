@@ -1,5 +1,5 @@
-name: Tests, build and push docker container on PR in dev
-run-name: ${{ github.actor }} is pushing docker container🚀
+name: Tests and build docker container on PR in dev
+run-name: ${{ github.actor }} is building docker container🚀
 
 on:
   pull_request:
