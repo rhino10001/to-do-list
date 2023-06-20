@@ -5,12 +5,13 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.stereotype.Service
 import rhino10001.todolist.dto.toJwtUserDetailsImpl
-import rhino10001.todolist.service.UserService
+import rhino10001.todolist.model.toDTO
+import rhino10001.todolist.repository.UserRepository
 
 @Service
-class JwtUserDetailsServiceImpl @Autowired constructor(val userService: UserService): UserDetailsService {
+class JwtUserDetailsServiceImpl @Autowired constructor(val userRepository: UserRepository): UserDetailsService {
 
     override fun loadUserByUsername(username: String?): UserDetails {
-        return userService.findByUsername(username ?: "default").toJwtUserDetailsImpl()
+        return userRepository.findByUsername(username ?: "default").toDTO().toJwtUserDetailsImpl()
     }
 }

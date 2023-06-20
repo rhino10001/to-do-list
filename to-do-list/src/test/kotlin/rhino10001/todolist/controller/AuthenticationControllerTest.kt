@@ -2,6 +2,7 @@ package rhino10001.todolist.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.hamcrest.Matchers.`is`
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
@@ -10,25 +11,19 @@ import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.context.annotation.Import
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.MediaType
-import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.InternalAuthenticationServiceException
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.test.context.support.WithAnonymousUser
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.patch
 import org.springframework.test.web.servlet.post
 import rhino10001.todolist.configuration.SpringSecurityConfiguration
 import rhino10001.todolist.dto.RoleDTO
 import rhino10001.todolist.dto.UserDTO
-import rhino10001.todolist.dto.request.LoginRequest
-import rhino10001.todolist.dto.request.RefreshRequest
-import rhino10001.todolist.dto.request.RegistrationRequest
-import rhino10001.todolist.dto.request.toUserDTO
-import rhino10001.todolist.dto.response.ExceptionResponse
-import rhino10001.todolist.dto.response.LoginResponse
-import rhino10001.todolist.dto.response.RefreshResponse
-import rhino10001.todolist.dto.response.RegistrationResponse
-import rhino10001.todolist.model.RoleEntity
+import rhino10001.todolist.dto.request.*
+import rhino10001.todolist.dto.response.*
+import rhino10001.todolist.exception.JwtAuthenticationException
 import rhino10001.todolist.security.JwtTokenProvider
 import rhino10001.todolist.service.UserService
 
@@ -38,9 +33,6 @@ class AuthenticationControllerTest @Autowired constructor(
 
     @MockBean
     private val userService: UserService,
-
-    @MockBean
-    private val authenticationManager: AuthenticationManager,
 
     @MockBean
     private val jwtTokenProvider: JwtTokenProvider,
@@ -132,17 +124,17 @@ class AuthenticationControllerTest @Autowired constructor(
         )
 
 //        when
-        val foundUser = UserDTO(
-            username = userRequest.username,
-            roles = listOf(RoleDTO(type = RoleEntity.Type.ROLE_USER))
-        )
-        `when`(userService.findByUsername(userRequest.username)).thenReturn(foundUser)
-
         val accessToken = "test_access_token"
-        `when`(jwtTokenProvider.generateAccessToken(foundUser.username, foundUser.roles)).thenReturn(accessToken)
-
         val refreshToken = "test_refresh_token"
-        `when`(jwtTokenProvider.generateRefreshToken(foundUser.username)).thenReturn(refreshToken)
+
+        `when`(userService.login(userRequest.username, userRequest.password))
+            .thenReturn(
+                LoginResponse(
+                    username = userRequest.username,
+                    accessToken = accessToken,
+                    refreshToken = refreshToken
+                )
+            )
 
         val result = mockMvc
             .post("/api/v0/auth/login") {
@@ -175,9 +167,8 @@ class AuthenticationControllerTest @Autowired constructor(
         )
 
 //        when
-        val authentication = UsernamePasswordAuthenticationToken(userRequest.username, userRequest.password)
         val exception = InternalAuthenticationServiceException("Indifferently")
-        `when`(authenticationManager.authenticate(authentication)).thenThrow(exception)
+        `when`(userService.login(userRequest.username, userRequest.password)).thenThrow(exception)
 
         val result = mockMvc
             .post("/api/v0/auth/login") {
@@ -209,9 +200,8 @@ class AuthenticationControllerTest @Autowired constructor(
         )
 
 //        when
-        val authentication = UsernamePasswordAuthenticationToken(userRequest.username, userRequest.password)
         val exception = BadCredentialsException("Indifferently")
-        `when`(authenticationManager.authenticate(authentication)).thenThrow(exception)
+        `when`(userService.login(userRequest.username, userRequest.password)).thenThrow(exception)
 
         val result = mockMvc
             .post("/api/v0/auth/login") {
@@ -240,23 +230,16 @@ class AuthenticationControllerTest @Autowired constructor(
         val userRequest = RefreshRequest(refreshToken = "test_valid_refresh_token")
 
 //        when
-        `when`(jwtTokenProvider.validateRefreshToken(userRequest.refreshToken)).thenReturn(true)
-
-        val extractedUsername = "test_username"
-        `when`(jwtTokenProvider.getUsernameFromRefreshToken(userRequest.refreshToken)).thenReturn(extractedUsername)
-
-        val foundUser = UserDTO(
-            username = extractedUsername,
-            roles = listOf(RoleDTO(type = RoleEntity.Type.ROLE_USER))
-        )
-        `when`(userService.findByUsername(extractedUsername)).thenReturn(foundUser)
-
         val newAccessToken = "test_new_access_token"
-        `when`(jwtTokenProvider.generateAccessToken(foundUser.username, foundUser.roles)).thenReturn(newAccessToken)
-
         val newRefreshToken = "test_new_refresh_token"
-        `when`(jwtTokenProvider.generateRefreshToken(foundUser.username)).thenReturn(newRefreshToken)
 
+        `when`(userService.refresh(userRequest.refreshToken))
+            .thenReturn(
+                RefreshResponse(
+                    accessToken = newAccessToken,
+                    refreshToken = newRefreshToken
+                )
+            )
         val result = mockMvc
             .post("/api/v0/auth/refresh") {
                 contentType = MediaType.APPLICATION_JSON
@@ -284,7 +267,9 @@ class AuthenticationControllerTest @Autowired constructor(
         val userRequest = RefreshRequest(refreshToken = "test_invalid_refresh_token")
 
 //        when
-        `when`(jwtTokenProvider.validateRefreshToken(userRequest.refreshToken)).thenReturn(false)
+        val exception = JwtAuthenticationException("Invalid refresh token")
+        `when`(userService.refresh(userRequest.refreshToken))
+            .thenThrow(exception)
 
         val result = mockMvc
             .post("/api/v0/auth/refresh") {
@@ -301,6 +286,35 @@ class AuthenticationControllerTest @Autowired constructor(
         result
             .andExpect {
                 status { `is`(401) }
+                content { string(objectMapper.writeValueAsString(expectedResponse)) }
+            }
+    }
+
+    @Test
+    @Disabled
+    @WithMockUser
+    fun givenUserWithCorrectRequest_whenChangePassword_thenReturnsSucceed() {
+
+//        given
+        val userRequest = ChangePasswordRequest(
+            oldPassword = "oldPassword",
+            newPassword = "newPassword",
+            newPasswordConfirmation = "newPassword"
+        )
+
+//        when
+        val result = mockMvc
+            .patch("/api/v0/auth/refresh") {
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(userRequest)
+            }
+
+//        then
+        val expectedResponse = ChangePasswordResponse(message = "Password was successfully changed")
+
+        result
+            .andExpect {
+                status { `is`(202) }
                 content { string(objectMapper.writeValueAsString(expectedResponse)) }
             }
     }
