@@ -4,21 +4,27 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.hamcrest.Matchers.*
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.http.MediaType
+import org.springframework.security.test.context.support.WithAnonymousUser
+import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.patch
 import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import rhino10001.todolist.dto.RoleDTO
+import rhino10001.todolist.dto.request.ChangePasswordRequest
 import rhino10001.todolist.dto.request.LoginRequest
 import rhino10001.todolist.dto.request.RefreshRequest
 import rhino10001.todolist.dto.request.RegistrationRequest
 import rhino10001.todolist.dto.response.LoginResponse
+import rhino10001.todolist.model.RoleEntity
 import rhino10001.todolist.repository.UserRepository
+import rhino10001.todolist.security.JwtTokenProvider
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -32,14 +38,15 @@ class AuthenticationControllerIntegrationTest @Autowired constructor(
 
     private val userRepository: UserRepository,
 
-    @Value("\${jwt.refreshToken.expirationTime}")
-    private val refreshExpirationTime: Long
+    private val jwtTokenProvider: JwtTokenProvider
 ) {
 
     private val testUsername = "test_username"
     private val testPassword = "test_password"
+    private val testRoles: List<RoleDTO> = listOf(RoleDTO(type = RoleEntity.Type.ROLE_USER))
 
     @BeforeAll
+    @WithAnonymousUser
     fun givenNewUser_whenRegister_thenReturnsCreated() {
 
         try {
@@ -72,6 +79,7 @@ class AuthenticationControllerIntegrationTest @Autowired constructor(
     }
 
     @Test
+    @WithAnonymousUser
     fun givenExistingUser_whenRegister_thenReturnsError422() {
 
 //        given
@@ -98,6 +106,7 @@ class AuthenticationControllerIntegrationTest @Autowired constructor(
     }
 
     @Test
+    @WithAnonymousUser
     fun givenUserWithCorrectData_whenLogin_thenSucceed() {
 
 //        given
@@ -125,6 +134,7 @@ class AuthenticationControllerIntegrationTest @Autowired constructor(
     }
 
     @Test
+    @WithAnonymousUser
     fun givenUserWithUnknownUsername_whenLogin_thenReturnsError401() {
 
 //        given
@@ -151,6 +161,7 @@ class AuthenticationControllerIntegrationTest @Autowired constructor(
     }
 
     @Test
+    @WithAnonymousUser
     fun givenUserWithIncorrectPassword_whenLogin_thenReturnsError401() {
 
 //        given
@@ -177,6 +188,7 @@ class AuthenticationControllerIntegrationTest @Autowired constructor(
     }
 
     @Test
+    @WithAnonymousUser
     fun givenValidRefreshToken_whenRefresh_thenReturnsSucceed() {
 
 //        given
@@ -222,6 +234,7 @@ class AuthenticationControllerIntegrationTest @Autowired constructor(
     }
 
     @Test
+    @WithAnonymousUser
     fun givenInvalidRefreshToken_whenRefresh_thenReturnsError401() {
 
 //        given
@@ -252,7 +265,7 @@ class AuthenticationControllerIntegrationTest @Autowired constructor(
         val userRequest = RefreshRequest(refreshToken = refreshToken)
 
 //        when
-        Thread.sleep(refreshExpirationTime)
+        Thread.sleep(jwtTokenProvider.refreshExpirationTime)
 
         val result = mockMvc
             .post("/api/v0/auth/refresh") {
@@ -267,6 +280,101 @@ class AuthenticationControllerIntegrationTest @Autowired constructor(
                 content { contentType(MediaType.APPLICATION_JSON) }
                 jsonPath("$.statusCode", `is`(401))
                 jsonPath("$.message", `is`("Invalid refresh token"))
+            }
+    }
+
+    @Test
+    @WithMockUser
+    fun givenRequestWithCorrectRequest_whenChangePassword_thenReturnsSucceed() {
+
+//        given
+        val accessToken = jwtTokenProvider.generateAccessToken(testUsername, testRoles)
+        val userRequest = ChangePasswordRequest(
+            oldPassword = testPassword,
+            newPassword = "new_password",
+            newPasswordConfirmation = "new_password"
+        )
+
+//        when
+        val result = mockMvc
+            .patch("/api/v0/auth/change-password") {
+                headers {
+                    setBearerAuth(accessToken)
+                }
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(userRequest)
+            }
+
+//        then
+        result
+            .andExpect {
+                status { `is`(202) }
+                content { contentType(MediaType.APPLICATION_JSON) }
+                jsonPath("$.message", `is`("Password was successfully changed"))
+            }
+    }
+
+    @Test
+    @WithMockUser
+    fun givenRequestWithIncorrectPassword_whenChangePassword_thenReturnsError406() {
+
+//        given
+        val accessToken = jwtTokenProvider.generateAccessToken(testUsername, testRoles)
+        val userRequest = ChangePasswordRequest(
+            oldPassword = "wrong_old_password",
+            newPassword = "new_password",
+            newPasswordConfirmation = "new_password"
+        )
+
+//        when
+        val result = mockMvc
+            .patch("/api/v0/auth/change-password") {
+                headers {
+                    setBearerAuth(accessToken)
+                }
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(userRequest)
+            }
+
+//        then
+        result
+            .andExpect {
+                status { `is`(406) }
+                content { contentType(MediaType.APPLICATION_JSON) }
+                jsonPath("$.statusCode", `is`(406))
+                jsonPath("$.message", `is`("Incorrect old password"))
+            }
+    }
+
+    @Test
+    @WithMockUser
+    fun givenRequestWithDifferentNewPasswordAndConfirmation_whenChangePassword_thenReturnsError406() {
+
+//        given
+        val accessToken = jwtTokenProvider.generateAccessToken(testUsername, testRoles)
+        val userRequest = ChangePasswordRequest(
+            oldPassword = testPassword,
+            newPassword = "new_password",
+            newPasswordConfirmation = "wrong_new_password"
+        )
+
+//        when
+        val result = mockMvc
+            .patch("/api/v0/auth/change-password") {
+                headers {
+                    setBearerAuth(accessToken)
+                }
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(userRequest)
+            }
+
+//        then
+        result
+            .andExpect {
+                status { `is`(406) }
+                content { contentType(MediaType.APPLICATION_JSON) }
+                jsonPath("$.statusCode", `is`(406))
+                jsonPath("$.message", `is`("New password is not equal to confirmation"))
             }
     }
 }

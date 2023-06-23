@@ -1,5 +1,6 @@
 package rhino10001.todolist.controller
 
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.HttpStatus
@@ -7,6 +8,7 @@ import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.InternalAuthenticationServiceException
 import org.springframework.web.bind.annotation.*
 import rhino10001.todolist.dto.request.*
+import rhino10001.todolist.dto.response.ChangePasswordResponse
 import rhino10001.todolist.dto.response.LoginResponse
 import rhino10001.todolist.dto.response.RefreshResponse
 import rhino10001.todolist.dto.response.RegistrationResponse
@@ -55,21 +57,23 @@ class AuthenticationController @Autowired constructor(
     fun refresh(@RequestBody refreshRequest: RefreshRequest): RefreshResponse {
         return userService.refresh(refreshRequest.refreshToken)
     }
-//
-//    @PatchMapping("/change-password")
-//    @ResponseStatus(HttpStatus.ACCEPTED)
-//    fun changePassword(
-//        @RequestBody changePasswordRequest: ChangePasswordRequest,
-//        request: HttpServletRequest
-//    ): ChangePasswordResponse {
-//        val token = request.getHeader("Authentication")
-//        val username = jwtTokenProvider.getUsernameFromAccessToken(token)
-//        userService.changePassword(
-//            username,
-//            changePasswordRequest.oldPassword,
-//            changePasswordRequest.newPassword,
-//            changePasswordRequest.newPasswordConfirmation
-//        )
-//        return ChangePasswordResponse("")
-//    }
+
+    @PatchMapping("/change-password")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    fun changePassword(
+        @RequestBody changePasswordRequest: ChangePasswordRequest,
+        request: HttpServletRequest
+    ): ChangePasswordResponse {
+
+        val authHeader = request.getHeader("Authorization")
+        val prefix = "Bearer "
+        val token = authHeader.substringAfter(prefix)
+
+        return userService.changePassword(
+            accessToken = token,
+            oldPassword = changePasswordRequest.oldPassword,
+            newPassword = changePasswordRequest.newPassword,
+            newPasswordConfirmation = changePasswordRequest.newPasswordConfirmation
+        )
+    }
 }

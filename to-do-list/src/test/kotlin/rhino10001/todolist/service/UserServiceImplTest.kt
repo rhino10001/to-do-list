@@ -14,14 +14,15 @@ import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.InternalAuthenticationServiceException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.security.test.context.support.WithAnonymousUser
 import rhino10001.todolist.dto.RoleDTO
 import rhino10001.todolist.dto.UserDTO
 import rhino10001.todolist.dto.request.LoginRequest
 import rhino10001.todolist.dto.request.RefreshRequest
+import rhino10001.todolist.dto.response.ChangePasswordResponse
 import rhino10001.todolist.dto.response.LoginResponse
 import rhino10001.todolist.dto.response.RefreshResponse
 import rhino10001.todolist.dto.toEntity
+import rhino10001.todolist.exception.ChangePasswordException
 import rhino10001.todolist.exception.JwtAuthenticationException
 import rhino10001.todolist.model.RoleEntity
 import rhino10001.todolist.model.UserEntity
@@ -179,7 +180,12 @@ class UserServiceImplTest(
         `when`(authenticationManager.authenticate(authentication)).thenThrow(exception)
 
 //        then
-        assertThrows<InternalAuthenticationServiceException> { userService.login(userRequest.username, userRequest.password) }
+        assertThrows<InternalAuthenticationServiceException> {
+            userService.login(
+                userRequest.username,
+                userRequest.password
+            )
+        }
     }
 
     @Test
@@ -201,7 +207,6 @@ class UserServiceImplTest(
     }
 
     @Test
-    @WithAnonymousUser
     fun givenValidRefreshToken_whenRefresh_thenNewTokensPair() {
 
 //        given
@@ -245,5 +250,90 @@ class UserServiceImplTest(
 
 //        then
         assertThrows<JwtAuthenticationException> { userService.refresh(userRequest.refreshToken) }
+    }
+
+    @Test
+    fun givenCorrectPassword_whenChangePassword_thenReturnsOK() {
+
+//        given
+        val accessToken = "test_access_token"
+        val oldPassword = "test_password"
+        val newPassword = "test_new_password"
+        val newPasswordConfirmation = "test_new_password"
+
+//        when
+        val foundUser = UserDTO(
+            username = "test_username",
+            password = "test_encoded_password"
+        )
+        `when`(jwtTokenProvider.getUsernameFromAccessToken(accessToken)).thenReturn(foundUser.username)
+        `when`(userRepository.findByUsername(foundUser.username)).thenReturn(foundUser.toEntity())
+        `when`(passwordEncoder.matches(oldPassword, foundUser.password)).thenReturn(true)
+
+        val encodedNewPassword = "test_encoded_new_password"
+        `when`(passwordEncoder.encode(newPassword)).thenReturn(encodedNewPassword)
+
+//        then
+        val expectedResponse = ChangePasswordResponse(message = "Password was successfully changed")
+
+        assertEquals(
+            expectedResponse,
+            userService.changePassword(
+                accessToken = accessToken,
+                oldPassword = oldPassword,
+                newPassword = newPassword,
+                newPasswordConfirmation = newPasswordConfirmation
+            )
+        )
+    }
+
+    @Test
+    fun givenIncorrectPassword_whenChangePassword_thenThrowsException() {
+
+//        given
+        val accessToken = "test_access_token"
+        val oldPassword = "wrong_old_password"
+        val newPassword = "new_password"
+        val newPasswordConfirmation = "new_password"
+
+//        when
+        val foundUser = UserDTO(
+            username = "test_username",
+            password = "test_encoded_password"
+        )
+        `when`(jwtTokenProvider.getUsernameFromAccessToken(accessToken)).thenReturn(foundUser.username)
+        `when`(userRepository.findByUsername(foundUser.username)).thenReturn(foundUser.toEntity())
+        `when`(passwordEncoder.matches(oldPassword, foundUser.password)).thenReturn(false)
+
+//        then
+        assertThrows<ChangePasswordException> {
+            userService.changePassword(
+                accessToken = accessToken,
+                oldPassword = oldPassword,
+                newPassword = newPassword,
+                newPasswordConfirmation = newPasswordConfirmation
+            )
+        }
+    }
+
+    @Test
+    fun givenDifferentNewPasswordAndConfirmation_whenChangePassword_thenThrowsException() {
+
+//        given
+        val accessToken = "test_access_token"
+        val oldPassword = "test_password"
+        val newPassword = "new_password"
+        val newPasswordConfirmation = "wrong_new_password"
+
+//        when
+//        then
+        assertThrows<ChangePasswordException> {
+            userService.changePassword(
+                accessToken = accessToken,
+                oldPassword = oldPassword,
+                newPassword = newPassword,
+                newPasswordConfirmation = newPasswordConfirmation
+            )
+        }
     }
 }

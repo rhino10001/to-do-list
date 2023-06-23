@@ -2,7 +2,6 @@ package rhino10001.todolist.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.hamcrest.Matchers.`is`
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
@@ -23,6 +22,7 @@ import rhino10001.todolist.dto.RoleDTO
 import rhino10001.todolist.dto.UserDTO
 import rhino10001.todolist.dto.request.*
 import rhino10001.todolist.dto.response.*
+import rhino10001.todolist.exception.ChangePasswordException
 import rhino10001.todolist.exception.JwtAuthenticationException
 import rhino10001.todolist.security.JwtTokenProvider
 import rhino10001.todolist.service.UserService
@@ -291,30 +291,132 @@ class AuthenticationControllerTest @Autowired constructor(
     }
 
     @Test
-    @Disabled
     @WithMockUser
-    fun givenUserWithCorrectRequest_whenChangePassword_thenReturnsSucceed() {
+    fun givenRequestWithCorrectRequest_whenChangePassword_thenReturnsSucceed() {
 
 //        given
+        val accessToken = "test_access_token"
         val userRequest = ChangePasswordRequest(
-            oldPassword = "oldPassword",
-            newPassword = "newPassword",
-            newPasswordConfirmation = "newPassword"
+            oldPassword = "old_password",
+            newPassword = "new_password",
+            newPasswordConfirmation = "new_password"
         )
 
 //        when
+        val expectedResponse = ChangePasswordResponse(message = "Password was successfully changed")
+        `when`(
+            userService.changePassword(
+                accessToken = accessToken,
+                oldPassword = userRequest.oldPassword,
+                newPassword = userRequest.newPassword,
+                newPasswordConfirmation = userRequest.newPasswordConfirmation
+            )
+        ).thenReturn(expectedResponse)
+
         val result = mockMvc
-            .patch("/api/v0/auth/refresh") {
+            .patch("/api/v0/auth/change-password") {
+                headers {
+                    setBearerAuth(accessToken)
+                }
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(userRequest)
+            }
+
+
+//        then
+        result
+            .andExpect {
+                status { `is`(202) }
+                content { string(objectMapper.writeValueAsString(expectedResponse)) }
+            }
+    }
+
+    @Test
+    @WithMockUser
+    fun givenRequestWithIncorrectPassword_whenChangePassword_thenReturnsError406() {
+
+//        given
+        val accessToken = "test_access_token"
+        val userRequest = ChangePasswordRequest(
+            oldPassword = "wrong_old_password",
+            newPassword = "new_password",
+            newPasswordConfirmation = "new_password"
+        )
+
+//        when
+        val exception = ChangePasswordException("Incorrect old password")
+        `when`(
+            userService.changePassword(
+                accessToken = accessToken,
+                oldPassword = userRequest.oldPassword,
+                newPassword = userRequest.newPassword,
+                newPasswordConfirmation = userRequest.newPasswordConfirmation
+            )
+        ).thenThrow(exception)
+
+        val result = mockMvc
+            .patch("/api/v0/auth/change-password") {
+                headers {
+                    setBearerAuth(accessToken)
+                }
                 contentType = MediaType.APPLICATION_JSON
                 content = objectMapper.writeValueAsString(userRequest)
             }
 
 //        then
-        val expectedResponse = ChangePasswordResponse(message = "Password was successfully changed")
+        val expectedResponse = ExceptionResponse(
+            statusCode = 406,
+            message = "Incorrect old password"
+        )
 
         result
             .andExpect {
-                status { `is`(202) }
+                status { `is`(406) }
+                content { string(objectMapper.writeValueAsString(expectedResponse)) }
+            }
+    }
+
+    @Test
+    @WithMockUser
+    fun givenRequestWithDifferentNewPasswordAndConfirmation_whenChangePassword_thenReturnsError406() {
+
+//        given
+        val accessToken = "test_access_token"
+        val userRequest = ChangePasswordRequest(
+            oldPassword = "old_password",
+            newPassword = "new_password",
+            newPasswordConfirmation = "new_password_123"
+        )
+
+//        when
+        val exception = ChangePasswordException("New password is not equal to confirmation")
+        `when`(
+            userService.changePassword(
+                accessToken = accessToken,
+                oldPassword = userRequest.oldPassword,
+                newPassword = userRequest.newPassword,
+                newPasswordConfirmation = userRequest.newPasswordConfirmation
+            )
+        ).thenThrow(exception)
+
+        val result = mockMvc
+            .patch("/api/v0/auth/change-password") {
+                headers {
+                    setBearerAuth(accessToken)
+                }
+                contentType = MediaType.APPLICATION_JSON
+                content = objectMapper.writeValueAsString(userRequest)
+            }
+
+//        then
+        val expectedResponse = ExceptionResponse(
+            statusCode = 406,
+            message = "New password is not equal to confirmation"
+        )
+
+        result
+            .andExpect {
+                status { `is`(406) }
                 content { string(objectMapper.writeValueAsString(expectedResponse)) }
             }
     }

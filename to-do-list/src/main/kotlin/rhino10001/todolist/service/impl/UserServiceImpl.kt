@@ -6,9 +6,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import rhino10001.todolist.dto.UserDTO
+import rhino10001.todolist.dto.response.ChangePasswordResponse
 import rhino10001.todolist.dto.response.LoginResponse
 import rhino10001.todolist.dto.response.RefreshResponse
 import rhino10001.todolist.dto.toEntity
+import rhino10001.todolist.exception.ChangePasswordException
 import rhino10001.todolist.exception.JwtAuthenticationException
 import rhino10001.todolist.model.RoleEntity
 import rhino10001.todolist.model.toDTO
@@ -57,19 +59,25 @@ class UserServiceImpl @Autowired constructor(
     }
 
     override fun changePassword(
-        username: String,
+        accessToken: String,
         oldPassword: String,
         newPassword: String,
         newPasswordConfirmation: String
-    ) {
-//        val user = userRepository.findByUsername(username)
-//        if (newPassword != newPasswordConfirmation) {
-//            throw ChangePasswordException("New password is not according with confirmation")
-//        }
-//
-//        if (passwordEncoder.matches(oldPassword, user.password)) {
-////            update
-////            userRepository.save(user.copy(password = passwordEncoder.encode(newPassword)))
-//        }
+    ): ChangePasswordResponse {
+
+        if (newPassword != newPasswordConfirmation) {
+            throw ChangePasswordException("New password is not equal to confirmation")
+        }
+
+        val username = jwtTokenProvider.getUsernameFromAccessToken(accessToken)
+        val userEntity = userRepository.findByUsername(username)
+
+        if (passwordEncoder.matches(oldPassword, userEntity.password)) {
+            userEntity.password = passwordEncoder.encode(newPassword)
+            userRepository.save(userEntity)
+            return ChangePasswordResponse("Password was successfully changed")
+        } else {
+            throw ChangePasswordException("Incorrect old password")
+        }
     }
 }
