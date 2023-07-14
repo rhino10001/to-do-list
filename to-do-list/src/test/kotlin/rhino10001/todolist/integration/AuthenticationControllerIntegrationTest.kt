@@ -30,6 +30,7 @@ import rhino10001.todolist.security.JwtTokenProvider
 @AutoConfigureMockMvc
 @TestPropertySource(locations = ["classpath:application.yml"])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 class AuthenticationControllerIntegrationTest @Autowired constructor(
 
     private val mockMvc: MockMvc,
@@ -106,6 +107,7 @@ class AuthenticationControllerIntegrationTest @Autowired constructor(
     }
 
     @Test
+    @Order(0)
     @WithAnonymousUser
     fun givenUserWithCorrectData_whenLogin_thenSucceed() {
 
