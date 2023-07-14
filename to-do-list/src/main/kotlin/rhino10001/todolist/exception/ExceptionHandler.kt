@@ -85,4 +85,15 @@ class ExceptionHandler(
             request
         )
     }
+
+    @ExceptionHandler(value = [(ChangePasswordException::class)])
+    protected fun onChangePasswordException(ex: RuntimeException, request: WebRequest): ResponseEntity<Any>? {
+        return handleExceptionInternal(
+            ex,
+            ex.message?.let { ExceptionResponse(HttpStatus.NOT_ACCEPTABLE.value(), it) },
+            HttpHeaders(),
+            HttpStatus.NOT_ACCEPTABLE,
+            request
+        )
+    }
 }

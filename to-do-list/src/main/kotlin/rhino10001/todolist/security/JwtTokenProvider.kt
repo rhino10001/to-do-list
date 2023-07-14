@@ -42,7 +42,7 @@ data class JwtTokenProvider @Autowired constructor(
 
     fun validateRefreshToken(token: String) = validateToken(token, refreshSecret)
 
-    private fun getUsernameFromAccessToken(token: String) = parseSubject(token, accessSecret)
+    fun getUsernameFromAccessToken(token: String) = parseSubject(token, accessSecret)
 
     fun getUsernameFromRefreshToken(token: String) = parseSubject(token, refreshSecret)
 

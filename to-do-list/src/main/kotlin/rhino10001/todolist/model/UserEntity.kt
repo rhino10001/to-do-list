@@ -16,7 +16,7 @@ data class UserEntity(
     val username: String,
 
     @Column(name = "password")
-    val password: String,
+    var password: String,
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
