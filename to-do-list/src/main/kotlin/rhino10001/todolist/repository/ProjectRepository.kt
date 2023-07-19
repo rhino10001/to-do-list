@@ -4,4 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 import rhino10001.todolist.model.ProjectEntity
 
 interface ProjectRepository: JpaRepository<ProjectEntity, Long> {
+
+    fun findByUserUsername(username: String): List<ProjectEntity>
 }
