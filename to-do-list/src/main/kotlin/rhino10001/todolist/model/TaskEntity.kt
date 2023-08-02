@@ -4,21 +4,40 @@ import jakarta.persistence.*
 
 @Entity
 @Table(name = "tasks")
-data class TaskEntity(
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+open class TaskEntity(
 
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long? = null,
+    open var id: Long? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")
-    val project: ProjectEntity? = null,
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id")
-    val parent: TaskEntity? = null,
+    open val project: ProjectEntity? = null,
 
     @Column(name = "title")
-    val title: String
-)
+    open val title: String
+
+
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as TaskEntity
+
+        if (id != other.id) return false
+        if (project != other.project) return false
+        if (title != other.title) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = id?.hashCode() ?: 0
+        result = 31 * result + (project?.hashCode() ?: 0)
+        result = 31 * result + title.hashCode()
+        return result
+    }
+}

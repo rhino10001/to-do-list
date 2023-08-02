@@ -6,6 +6,4 @@ import rhino10001.todolist.model.TaskEntity
 interface TaskRepository : JpaRepository<TaskEntity, Long> {
 
     fun findByProjectId(projectId: Long): List<TaskEntity>
-
-    fun findByParentId(parentId: Long): List<TaskEntity>
 }

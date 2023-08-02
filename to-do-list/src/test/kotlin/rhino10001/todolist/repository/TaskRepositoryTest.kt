@@ -18,7 +18,7 @@ import rhino10001.todolist.model.UserEntity
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class TaskRepositoryTest @Autowired constructor(
     private val entityManager: TestEntityManager,
-    private val taskRepository: TaskRepository,
+    private val taskRepository: TaskRepository
 ) {
 
     @Test
@@ -94,90 +94,6 @@ class TaskRepositoryTest @Autowired constructor(
     }
 
     @Test
-    fun givenExistingParentId_whenFindByParentId_thenReturnsSubtasks() {
-
-        val roleUser = entityManager.find(RoleEntity::class.java, 2)
-
-        val user = UserEntity(
-            username = "test_username",
-            password = "test_encoded_password",
-            roles = listOf(roleUser)
-        )
-        entityManager.persist(user)
-
-        val project = ProjectEntity(
-            user = user,
-            title = "test_title",
-            description = "test_description"
-        )
-        entityManager.persist(project)
-
-        val parent = TaskEntity(
-            project = project,
-            title = "test_title"
-        )
-        entityManager.persist(parent)
-
-        val first = TaskEntity(
-            parent = parent,
-            title = "test_title"
-        )
-        entityManager.persist(first)
-
-        val second = TaskEntity(
-            parent = parent,
-            title = "test_title"
-        )
-        entityManager.persist(second)
-        entityManager.flush()
-
-//        given
-        val id = parent.id
-
-//        when
-        val found = id?.let { taskRepository.findByParentId(it) }
-
-//        then
-        found?.let { Assertions.assertEquals(2, it.size) }
-    }
-
-    @Test
-    fun givenParentWithoutTasks_whenFindByParentId_thenReturnsEmptyList() {
-
-        val roleUser = entityManager.find(RoleEntity::class.java, 2)
-
-        val user = UserEntity(
-            username = "test_username",
-            password = "test_encoded_password",
-            roles = listOf(roleUser)
-        )
-        entityManager.persist(user)
-
-        val project = ProjectEntity(
-            user = user,
-            title = "test_title",
-            description = "test_description"
-        )
-        entityManager.persist(project)
-
-        val parent = TaskEntity(
-            project = project,
-            title = "test_title"
-        )
-        entityManager.persist(parent)
-        entityManager.flush()
-
-//        given
-        val id = parent.id
-
-//        when
-        val projects = id?.let { taskRepository.findByParentId(it) }
-
-//        then
-        projects?.let { Assertions.assertTrue(it.isEmpty()) }
-    }
-
-    @Test
     fun givenNewTask_whenSave_thenReturnsSaved() {
 
 //        given
@@ -210,54 +126,6 @@ class TaskRepositoryTest @Autowired constructor(
         val expected = TaskEntity(
             id = saved.id,
             project = project,
-            parent = null,
-            title = "test_title",
-        )
-
-        Assertions.assertNotNull(saved.id)
-        Assertions.assertEquals(expected, saved)
-    }
-
-    @Test
-    fun givenNewSubtask_whenSave_thenReturnsSaved() {
-
-//        given
-        val roleUser = entityManager.find(RoleEntity::class.java, 2)
-
-        val user = UserEntity(
-            username = "test_username",
-            password = "test_encoded_password",
-            roles = listOf(roleUser)
-        )
-        entityManager.persist(user)
-
-        val project = ProjectEntity(
-            user = user,
-            title = "test_title",
-            description = "test_description"
-        )
-        entityManager.persist(project)
-
-        val parent = TaskEntity(
-            project = project,
-            title = "test_title"
-        )
-        entityManager.persist(parent)
-        entityManager.flush()
-
-        val givenTaskEntity = TaskEntity(
-            parent = parent,
-            title = "test_title"
-        )
-
-//        when
-        val saved = taskRepository.save(givenTaskEntity)
-
-//        then
-        val expected = TaskEntity(
-            id = saved.id,
-            project = null,
-            parent = parent,
             title = "test_title",
         )
 
@@ -301,7 +169,6 @@ class TaskRepositoryTest @Autowired constructor(
         val expected = TaskEntity(
             id = id,
             project = project,
-            parent = null,
             title = "test_title"
         )
 
