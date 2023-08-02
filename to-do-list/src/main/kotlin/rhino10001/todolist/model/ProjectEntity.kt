@@ -3,7 +3,7 @@ package rhino10001.todolist.model
 import jakarta.persistence.*
 
 @Entity
-@Table(name = "projects")
+@Table(name = "project")
 data class ProjectEntity(
 
     @Id

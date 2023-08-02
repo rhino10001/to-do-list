@@ -4,7 +4,7 @@ import jakarta.persistence.*
 import rhino10001.todolist.dto.RoleDTO
 
 @Entity
-@Table(name = "roles")
+@Table(name = "role")
 data class RoleEntity(
 
     @Id

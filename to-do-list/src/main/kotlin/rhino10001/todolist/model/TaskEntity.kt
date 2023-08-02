@@ -3,8 +3,9 @@ package rhino10001.todolist.model
 import jakarta.persistence.*
 
 @Entity
-@Table(name = "tasks")
+@Table(name = "task")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "type")
 open class TaskEntity(
 
     @Id

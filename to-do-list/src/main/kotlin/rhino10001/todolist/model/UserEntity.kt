@@ -4,7 +4,7 @@ import jakarta.persistence.*
 import rhino10001.todolist.dto.UserDTO
 
 @Entity
-@Table(name = "users")
+@Table(name = "\"user\"")
 data class UserEntity(
 
     @Id
@@ -20,7 +20,7 @@ data class UserEntity(
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-        name = "users_roles",
+        name = "user_role",
         joinColumns = [JoinColumn(name = "user_id", referencedColumnName = "id")],
         inverseJoinColumns = [JoinColumn(name = "role_id", referencedColumnName = "id")]
     )
