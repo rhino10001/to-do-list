@@ -12,7 +12,7 @@ data class UserEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
 
-    @Column(name = "username")
+    @Column(name = "username", unique = true)
     val username: String,
 
     @Column(name = "password")
