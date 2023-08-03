@@ -5,8 +5,8 @@ databaseChangeLog:
       author: rhino10001
       changes:
         - createTable:
-            tableName: users
-            remarks: users
+            tableName: user
+            remarks: user
             columns:
               - column:
                   name: id
@@ -16,13 +16,13 @@ databaseChangeLog:
                     primaryKeyName: pk_user
               - column:
                   name: username
-                  type: varchar(100)
+                  type: varchar(63)
                   constraints:
                     unique: true
                     nullable: false
               - column:
                   name: password
-                  type: varchar(100)
+                  type: varchar(63)
                   constraints:
                     nullable: false
   - changeSet:
@@ -30,8 +30,8 @@ databaseChangeLog:
       author: rhino10001
       changes:
         - createTable:
-            tableName: roles
-            remarks: roles
+            tableName: role
+            remarks: role
             columns:
               - column:
                   name: id
@@ -41,7 +41,7 @@ databaseChangeLog:
                     primaryKeyName: pk_role
               - column:
                   name: type
-                  type: varchar(100)
+                  type: varchar(31)
                   constraints:
                     unique: true
                     nullable: false
@@ -50,32 +50,97 @@ databaseChangeLog:
       author: rhino10001
       changes:
         - createTable:
-            tableName: users_roles
-            remarks: users_roles
+            tableName: user_role
+            remarks: user_role
             columns:
               - column:
                   name: user_id
-                  type: bigserial
+                  type: bigint
                   constraints:
+                    foreignKeyName: fk_user
+                    references: user(id)
                     nullable: false
               - column:
                   name: role_id
-                  type: bigserial
+                  type: bigint
                   constraints:
+                    foreignKeyName: fk_role
+                    references: role(id)
                     nullable: false
   - changeSet:
       id: DEV-0.0.4
       author: rhino10001
+      changes:
+        - createTable:
+            tableName: project
+            remarks: project
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_project
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    foreignKeyName: fk_project_user
+                    references: user(id)
+                    nullable: false
+              - column:
+                  name: title
+                  type: varchar(31)
+              - column:
+                  name: description
+                  type: varchar(255)
+  - changeSet:
+      id: DEV-0.0.5
+      author: rhino10001
+      changes:
+        - createTable:
+            tableName: task
+            remarks: task
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_task
+              - column:
+                  name: type
+                  type: varchar(31)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: project_id
+                  type: bigint
+                  constraints:
+                    foreignKeyName: fk_task_project
+                    references: project(id)
+              - column:
+                  name: task_id
+                  type: bigint
+                  constraints:
+                    foreignKeyName: fk_task_task
+                    references: task(id)
+              - column:
+                  name: title
+                  type: varchar(31)
+  - changeSet:
+      id: DEV-0.0.6
+      author: rhino10001
       comment: "Roles insertion"
       changes:
         - insert:
-            tableName: roles
+            tableName: role
             columns:
               - column:
                   name: type
                   value: "ROLE_ADMIN"
         - insert:
-            tableName: roles
+            tableName: role
             columns:
               - column:
                   name: type

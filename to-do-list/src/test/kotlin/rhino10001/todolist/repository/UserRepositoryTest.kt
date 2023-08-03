@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
 import org.springframework.dao.DataIntegrityViolationException
@@ -13,7 +14,8 @@ import rhino10001.todolist.model.RoleEntity
 import rhino10001.todolist.model.UserEntity
 
 
-@DataJpaTest(showSql = false)
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class UserRepositoryTest @Autowired constructor(
     private val entityManager: TestEntityManager,
     private val userRepository: UserRepository
@@ -66,12 +68,13 @@ class UserRepositoryTest @Autowired constructor(
         )
 
 //        when
+//        then
         assertEquals("ROLE_USER", roleUser.type.name)
         assertThrows<DataIntegrityViolationException> { userRepository.save(givenUserEntity) }
     }
 
     @Test
-    fun givenExistingUsername_whenFindByUsername_thenReturnUser() {
+    fun givenExistingUsername_whenFindByUsername_thenReturnsUser() {
 
         val roleUser = entityManager.find(RoleEntity::class.java, 2)
         val registeredUserEntity = UserEntity(
@@ -114,9 +117,10 @@ class UserRepositoryTest @Autowired constructor(
         entityManager.flush()
 
 //        given
-        val givenUsername = "est_username"
+        val givenUsername = "test_unknown_username"
 
 //        when
+//        then
         assertEquals("ROLE_USER", roleUser.type.name)
         assertThrows<EmptyResultDataAccessException> { userRepository.findByUsername(givenUsername) }
     }

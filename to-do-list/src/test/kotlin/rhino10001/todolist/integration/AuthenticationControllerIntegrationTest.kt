@@ -79,6 +79,9 @@ class AuthenticationControllerIntegrationTest @Autowired constructor(
             }
     }
 
+    @AfterAll
+    fun clearDB() = userRepository.deleteAll()
+
     @Test
     @WithAnonymousUser
     fun givenExistingUser_whenRegister_thenReturnsError422() {

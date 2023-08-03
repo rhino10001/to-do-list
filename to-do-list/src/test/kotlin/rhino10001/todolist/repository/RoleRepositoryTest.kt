@@ -3,10 +3,12 @@ package rhino10001.todolist.repository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import rhino10001.todolist.model.RoleEntity
 
 @DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class RoleRepositoryTest @Autowired constructor(
     private val roleRepository: RoleRepository
 ) {
